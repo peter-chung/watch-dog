@@ -1,5 +1,6 @@
-from pydantic import BaseModel, EmailStr, HttpUrl, field_validator
 from typing import Optional
+
+from pydantic import BaseModel, EmailStr, HttpUrl, field_validator
 
 
 class TrackerCreate(BaseModel):

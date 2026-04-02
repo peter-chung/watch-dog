@@ -1,0 +1,32 @@
+from datetime import datetime, timezone
+from typing import Any
+
+from app.database.supabase import supabase
+
+
+def create_tracker_record(payload: dict[str, Any]):
+    response = supabase.table("trackers").insert(payload).execute()
+    return response.data
+
+
+def get_all_trackers():
+    response = (
+        supabase.table("trackers").select("*").order("created_at", desc=True).execute()
+    )
+    return response.data
+
+
+def get_tracker_by_id_record(tracker_id: str):
+    response = (
+        supabase.table("trackers").select("*").eq("id", tracker_id).limit(1).execute()
+    )
+    return response.data
+
+
+def update_tracker_record(tracker_id: str, update_data: dict[str, Any]):
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+
+    response = (
+        supabase.table("trackers").update(update_data).eq("id", tracker_id).execute()
+    )
+    return response.data

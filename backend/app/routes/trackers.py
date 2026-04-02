@@ -1,8 +1,12 @@
-from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException
 
-from app.database.supabase import supabase
 from app.schemas.tracker import TrackerCreate, TrackerUpdate
+from app.services.trackers import (
+    create_tracker_record,
+    get_all_trackers,
+    get_tracker_by_id_record,
+    update_tracker_record,
+)
 
 router = APIRouter(prefix="/trackers", tags=["trackers"])
 
@@ -16,47 +20,39 @@ def create_tracker(tracker: TrackerCreate):
         "is_active": True,
     }
 
-    response = supabase.table("trackers").insert(payload).execute()
+    data = create_tracker_record(payload)
 
-    if not response.data:
+    if not data:
         raise HTTPException(status_code=500, detail="Failed to create tracker")
 
-    return response.data[0]
+    return data[0]
 
 
 @router.get("")
 def get_trackers():
-    response = (
-        supabase.table("trackers").select("*").order("created_at", desc=True).execute()
-    )
-    return response.data
+    return get_all_trackers()
 
 
 @router.get("/{tracker_id}")
 def get_tracker_by_id(tracker_id: str):
-    response = (
-        supabase.table("trackers").select("*").eq("id", tracker_id).limit(1).execute()
-    )
+    data = get_tracker_by_id_record(tracker_id)
 
-    if not response.data:
+    if not data:
         raise HTTPException(status_code=404, detail="Tracker not found")
 
-    return response.data[0]
+    return data[0]
 
 
 @router.patch("/{tracker_id}")
 def update_tracker(tracker_id: str, tracker_update: TrackerUpdate):
     update_data = tracker_update.model_dump(exclude_unset=True)
-    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
 
     if not update_data:
         raise HTTPException(status_code=400, detail="No fields provided for update")
 
-    response = (
-        supabase.table("trackers").update(update_data).eq("id", tracker_id).execute()
-    )
+    data = update_tracker_record(tracker_id, update_data)
 
-    if not response.data:
+    if not data:
         raise HTTPException(status_code=404, detail="Tracker not found")
 
-    return response.data[0]
+    return data[0]

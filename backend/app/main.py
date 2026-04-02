@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database.supabase import supabase
+from app.routes.trackers import router as trackers_router
 
 app = FastAPI()
 
@@ -23,37 +24,14 @@ app.add_middleware(
 )
 
 
+app.include_router(trackers_router)
+
+
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}
+    return {"message": "Watchdog backend is running"}
 
 
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
-
-
-@app.get("/supabase-test")
-def supabase_test():
-    return {
-        "message": "Supabase client loaded successfully",
-        "has_client": supabase is not None,
-    }
-
-
-@app.get("/trackers-test")
-def trackers_test():
-    response = supabase.table("trackers").select("*").execute()
-    return {
-        "data": response.data,
-        "count": len(response.data),
-    }
-
-
-@app.get("/change-logs-test")
-def change_logs_test():
-    response = supabase.table("change_logs").select("*").execute()
-    return {
-        "data": response.data,
-        "count": len(response.data),
-    }

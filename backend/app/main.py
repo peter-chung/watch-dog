@@ -1,10 +1,21 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database.supabase import supabase
 from app.routes.trackers import router as trackers_router
+from app.services.scheduler import start_scheduler, scheduler
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    start_scheduler()
+    yield
+    if scheduler.running:
+        scheduler.shutdown()
+
+
+app = FastAPI(lifespan=lifespan)
 
 origins = [
     "http://localhost:3000",

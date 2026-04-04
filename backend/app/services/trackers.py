@@ -30,3 +30,19 @@ def update_tracker_record(tracker_id: str, update_data: dict[str, Any]):
         supabase.table("trackers").update(update_data).eq("id", tracker_id).execute()
     )
     return response.data
+
+
+def create_change_log(payload: dict[str, Any]):
+    response = supabase.table("change_logs").insert(payload).execute()
+    return response.data
+
+
+def get_active_trackers():
+    response = (
+        supabase.table("trackers")
+        .select("*")
+        .eq("is_active", True)
+        .order("created_at", desc=True)
+        .execute()
+    )
+    return response.data

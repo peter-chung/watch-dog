@@ -44,3 +44,20 @@ class TrackerResponse(BaseModel):
     is_active: bool
     created_at: str
     updated_at: Optional[str] = None
+
+
+class TrackerTestRequest(BaseModel):
+    url: HttpUrl
+    selector: str
+
+    @field_validator("selector")
+    @classmethod
+    def selector_must_not_be_empty(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Selector cannot be empty")
+        return value
+
+
+class TrackerTestResponse(BaseModel):
+    preview: str

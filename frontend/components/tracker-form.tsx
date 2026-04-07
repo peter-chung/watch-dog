@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -105,7 +105,7 @@ export function TrackerForm() {
     <Card className="max-w-3xl border-border/70 pt-0">
       <CardHeader className="border-b bg-muted/20 px-4 py-4">
         <CardTitle>Create Tracker</CardTitle>
-        <CardDescription>
+        <CardDescription className="max-w-2xl">
           Add a webpage URL and CSS selector to watch. Alerts go to your account
           email automatically.
         </CardDescription>
@@ -123,8 +123,8 @@ export function TrackerForm() {
               onChange={(event) => setUrl(event.target.value)}
               required
             />
-            <p className="text-xs text-muted-foreground">
-              You can enter example.com — we&apos;ll add https:// for you.
+            <p className="text-xs leading-6 text-muted-foreground">
+              You can enter example.com - we&apos;ll add https:// for you.
             </p>
           </div>
 
@@ -157,10 +157,10 @@ export function TrackerForm() {
 
           {preview ? (
             <div className="space-y-2 rounded-xl border bg-muted/25 p-4">
-              <p className="text-sm font-medium text-foreground">
+              <p className="text-sm font-medium tracking-tight text-foreground">
                 Preview
               </p>
-              <p className="break-words text-sm leading-6 text-muted-foreground">
+              <p className="break-words text-sm leading-7 text-muted-foreground">
                 {preview}
               </p>
             </div>

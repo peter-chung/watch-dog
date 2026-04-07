@@ -258,10 +258,10 @@ export function TrackerDetailClient({
 
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="space-y-2">
-              <h1 className="break-all text-3xl font-semibold tracking-tight">
+              <h1 className="font-heading break-all text-3xl font-semibold leading-tight tracking-tight md:text-4xl">
                 {tracker.url}
               </h1>
-              <p className="text-muted-foreground">
+              <p className="max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">
                 Inspect tracker metadata, edit settings, and review change
                 history.
               </p>
@@ -292,7 +292,7 @@ export function TrackerDetailClient({
               <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
                 Selector
               </p>
-              <p className="break-all font-mono text-xs leading-5 text-foreground">
+              <p className="break-all font-mono text-xs leading-6 text-foreground">
                 {tracker.selector}
               </p>
             </div>
@@ -300,13 +300,15 @@ export function TrackerDetailClient({
               <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
                 Alert email
               </p>
-              <p className="break-all text-foreground">{tracker.email}</p>
+              <p className="break-all text-sm leading-6 text-foreground">
+                {tracker.email}
+              </p>
             </div>
             <div className="space-y-2 rounded-lg bg-muted/35 p-4">
               <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
                 Created
               </p>
-              <p className="text-foreground">
+              <p className="text-sm leading-6 text-foreground">
                 {formatDateTime(tracker.created_at)}
               </p>
             </div>
@@ -314,7 +316,7 @@ export function TrackerDetailClient({
               <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
                 Updated
               </p>
-              <p className="text-foreground">
+              <p className="text-sm leading-6 text-foreground">
                 {formatDateTime(tracker.updated_at ?? null)}
               </p>
             </div>
@@ -322,7 +324,7 @@ export function TrackerDetailClient({
               <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
                 Last checked
               </p>
-              <p className="text-foreground">
+              <p className="text-sm leading-6 text-foreground">
                 {formatDateTime(tracker.last_checked_at)}
               </p>
             </div>
@@ -330,7 +332,7 @@ export function TrackerDetailClient({
               <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
                 Last changed
               </p>
-              <p className="text-foreground">
+              <p className="text-sm leading-6 text-foreground">
                 {formatDateTime(tracker.last_changed_at)}
               </p>
             </div>
@@ -373,7 +375,7 @@ export function TrackerDetailClient({
                   }
                 >
                   <AlertTitle>Result: {checkResult.status}</AlertTitle>
-                  <AlertDescription>
+                  <AlertDescription className="space-y-1.5">
                     <p>{checkResult.message}</p>
                     {typeof checkResult.email_sent === "boolean" ? (
                       <p>Email sent: {checkResult.email_sent ? "Yes" : "No"}</p>
@@ -388,14 +390,14 @@ export function TrackerDetailClient({
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <p className="font-medium text-foreground">Old Content</p>
-                      <div className="rounded-xl border bg-muted/20 p-4 text-muted-foreground whitespace-pre-wrap break-words">
+                      <div className="rounded-xl border bg-muted/20 p-4 font-mono text-sm leading-7 text-muted-foreground whitespace-pre-wrap break-words">
                         {checkResult.old_content || "Empty"}
                       </div>
                     </div>
 
                     <div className="space-y-2">
                       <p className="font-medium text-foreground">New Content</p>
-                      <div className="rounded-xl border bg-muted/20 p-4 text-muted-foreground whitespace-pre-wrap break-words">
+                      <div className="rounded-xl border bg-muted/20 p-4 font-mono text-sm leading-7 text-muted-foreground whitespace-pre-wrap break-words">
                         {checkResult.new_content || "Empty"}
                       </div>
                     </div>
@@ -426,21 +428,21 @@ export function TrackerDetailClient({
                   key={log.id}
                   className="space-y-4 rounded-xl border bg-muted/15 p-4 text-sm shadow-sm"
                 >
-                  <p className="font-medium text-foreground">
+                  <p className="text-sm font-medium tracking-tight text-foreground">
                     {formatDateTime(log.changed_at)}
                   </p>
 
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <p className="font-medium text-foreground">Old Content</p>
-                      <div className="rounded-xl border bg-background p-4 text-muted-foreground whitespace-pre-wrap break-words">
+                      <div className="rounded-xl border bg-background p-4 font-mono text-sm leading-7 text-muted-foreground whitespace-pre-wrap break-words">
                         {log.old_content || "Empty"}
                       </div>
                     </div>
 
                     <div className="space-y-2">
                       <p className="font-medium text-foreground">New Content</p>
-                      <div className="rounded-xl border bg-background p-4 text-muted-foreground whitespace-pre-wrap break-words">
+                      <div className="rounded-xl border bg-background p-4 font-mono text-sm leading-7 text-muted-foreground whitespace-pre-wrap break-words">
                         {log.new_content || "Empty"}
                       </div>
                     </div>

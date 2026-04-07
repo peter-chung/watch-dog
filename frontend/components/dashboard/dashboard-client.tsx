@@ -64,8 +64,10 @@ export function DashboardClient() {
     <section className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">
+          <h1 className="font-heading text-3xl font-semibold tracking-tight md:text-4xl">
+            Dashboard
+          </h1>
+          <p className="max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">
             View and manage your tracked webpages.
           </p>
         </div>

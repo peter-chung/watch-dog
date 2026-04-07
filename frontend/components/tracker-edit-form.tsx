@@ -85,7 +85,7 @@ export function TrackerEditForm({
     <Card className="border-border/70 pt-0">
       <CardHeader className="border-b bg-muted/20 px-4 py-4">
         <CardTitle>Edit Tracker</CardTitle>
-        <CardDescription>
+        <CardDescription className="max-w-2xl">
           Update the page target, selector, or monitoring status.
         </CardDescription>
       </CardHeader>
@@ -117,7 +117,7 @@ export function TrackerEditForm({
           <div className="flex items-center justify-between rounded-xl border bg-muted/20 p-4 text-sm">
             <div className="space-y-1">
               <Label htmlFor="edit-active">Monitoring Status</Label>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs leading-6 text-muted-foreground">
                 {isActive ? "Tracker is active" : "Tracker is paused"}
               </p>
             </div>

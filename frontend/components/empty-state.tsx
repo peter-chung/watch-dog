@@ -27,7 +27,7 @@ export function EmptyState({
         <div className="flex size-10 items-center justify-center rounded-lg bg-muted/60 text-muted-foreground">
           {icon}
         </div>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle className="text-lg">{title}</CardTitle>
         <CardDescription className="max-w-md leading-6">
           {description}
         </CardDescription>

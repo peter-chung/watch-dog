@@ -64,7 +64,7 @@ export function TrackerList({ trackers }: TrackerListProps) {
             </CardAction>
 
             <div className="space-y-2">
-              <CardTitle className="break-all text-lg">
+              <CardTitle className="break-all text-lg leading-7">
                 <Link
                   href={`/trackers/${tracker.id}`}
                   className="transition-colors hover:text-primary"
@@ -88,14 +88,16 @@ export function TrackerList({ trackers }: TrackerListProps) {
               <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
                 Alert email
               </p>
-              <p className="break-all text-sm text-foreground">{tracker.email}</p>
+              <p className="break-all text-sm leading-6 text-foreground">
+                {tracker.email}
+              </p>
             </div>
 
             <div className="space-y-1 rounded-lg bg-muted/35 p-3">
               <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
                 Last checked
               </p>
-              <p className="text-sm text-foreground">
+              <p className="text-sm leading-6 text-foreground">
                 {formatDateTime(tracker.last_checked_at)}
               </p>
             </div>
@@ -104,14 +106,14 @@ export function TrackerList({ trackers }: TrackerListProps) {
               <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
                 Last changed
               </p>
-              <p className="text-sm text-foreground">
+              <p className="text-sm leading-6 text-foreground">
                 {formatDateTime(tracker.last_changed_at)}
               </p>
             </div>
           </CardContent>
 
           <CardFooter className="items-center justify-between gap-3">
-            <p className="text-xs text-muted-foreground">
+            <p className="max-w-xl text-xs leading-6 text-muted-foreground">
               Monitor settings and change history from the detail view.
             </p>
             <Button asChild variant="ghost" size="sm">

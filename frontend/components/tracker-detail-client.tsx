@@ -1,15 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
   deleteTracker,
   getTrackerById,
   getTrackerChangeLogs,
+  runTrackerCheck,
   updateTracker,
   type ChangeLog,
+  type TrackerCheckResult,
   type Tracker,
   type UpdateTrackerPayload,
 } from "@/lib/api";
@@ -50,11 +52,40 @@ export function TrackerDetailClient({
   const router = useRouter();
   const [tracker, setTracker] = useState<Tracker | null>(null);
   const [changeLogs, setChangeLogs] = useState<ChangeLog[]>([]);
+  const [checkResult, setCheckResult] = useState<TrackerCheckResult | null>(
+    null
+  );
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isRunningCheck, setIsRunningCheck] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleAuthError = useCallback(
+    async (message: string) => {
+      if (message === "Unauthorized." || message === "Invalid token.") {
+        const supabase = createClient();
+        await supabase.auth.signOut();
+        router.replace("/login");
+        return true;
+      }
+
+      return false;
+    },
+    [router]
+  );
+
+  async function refreshTrackerDetail() {
+    const [trackerData, logData] = await Promise.all([
+      getTrackerById(trackerId),
+      getTrackerChangeLogs(trackerId),
+    ]);
+
+    setTracker(trackerData);
+    setChangeLogs(logData);
+    setError(null);
+  }
 
   useEffect(() => {
     let isMounted = true;
@@ -81,10 +112,7 @@ export function TrackerDetailClient({
         const message =
           err instanceof Error ? err.message : "Failed to load tracker.";
 
-        if (message === "Unauthorized." || message === "Invalid token.") {
-          const supabase = createClient();
-          await supabase.auth.signOut();
-          router.replace("/login");
+        if (await handleAuthError(message)) {
           return;
         }
 
@@ -101,7 +129,7 @@ export function TrackerDetailClient({
     return () => {
       isMounted = false;
     };
-  }, [router, trackerId]);
+  }, [handleAuthError, trackerId]);
 
   async function handleSave(payload: UpdateTrackerPayload) {
     setIsSaving(true);
@@ -113,6 +141,30 @@ export function TrackerDetailClient({
       router.refresh();
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  async function handleRunCheck() {
+    setIsRunningCheck(true);
+    setError(null);
+    setCheckResult(null);
+
+    try {
+      const result = await runTrackerCheck(trackerId);
+      setCheckResult(result);
+      await refreshTrackerDetail();
+      router.refresh();
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to run tracker check.";
+
+      if (await handleAuthError(message)) {
+        return;
+      }
+
+      setError(message);
+    } finally {
+      setIsRunningCheck(false);
     }
   }
 
@@ -240,6 +292,66 @@ export function TrackerDetailClient({
           isSaving={isSaving}
           onSave={handleSave}
         />
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Manual Check</CardTitle>
+            <CardDescription>
+              Run a check now and refresh this tracker with the latest result.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleRunCheck}
+              disabled={isRunningCheck}
+            >
+              {isRunningCheck ? "Running Check..." : "Run Check"}
+            </Button>
+
+            {checkResult ? (
+              <div className="space-y-4 rounded-xl border bg-muted/30 p-4 text-sm">
+                <div className="space-y-1">
+                  <p className="font-medium text-foreground">
+                    Result: {checkResult.status}
+                  </p>
+                  <p className="text-muted-foreground">
+                    {checkResult.message}
+                  </p>
+                  {typeof checkResult.email_sent === "boolean" ? (
+                    <p className="text-muted-foreground">
+                      Email sent: {checkResult.email_sent ? "Yes" : "No"}
+                    </p>
+                  ) : null}
+                  {checkResult.email_error ? (
+                    <p className="text-destructive">
+                      Email error: {checkResult.email_error}
+                    </p>
+                  ) : null}
+                </div>
+
+                {checkResult.old_content || checkResult.new_content ? (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <p className="font-medium text-foreground">Old Content</p>
+                      <div className="rounded-lg bg-background p-3 text-muted-foreground whitespace-pre-wrap break-words">
+                        {checkResult.old_content || "Empty"}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <p className="font-medium text-foreground">New Content</p>
+                      <div className="rounded-lg bg-background p-3 text-muted-foreground whitespace-pre-wrap break-words">
+                        {checkResult.new_content || "Empty"}
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>

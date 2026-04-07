@@ -76,6 +76,16 @@ export type ChangeLog = {
   changed_at: string;
 };
 
+export type TrackerCheckResult = {
+  status: string;
+  message: string;
+  tracker?: Tracker;
+  old_content?: string;
+  new_content?: string;
+  email_sent?: boolean;
+  email_error?: string | null;
+};
+
 export async function createTracker(payload: CreateTrackerPayload) {
   const response = await apiFetch("/trackers", {
     method: "POST",
@@ -155,6 +165,20 @@ export async function deleteTracker(trackerId: string) {
   }
 
   return response.json() as Promise<{ deleted: boolean; tracker_id: string }>;
+}
+
+export async function runTrackerCheck(
+  trackerId: string
+): Promise<TrackerCheckResult> {
+  const response = await apiFetch(`/trackers/${trackerId}/check`, {
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseError(response, "Failed to run tracker check"));
+  }
+
+  return response.json();
 }
 
 export async function testTracker(payload: { url: string; selector: string }) {

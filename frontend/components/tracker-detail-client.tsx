@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { HistoryIcon } from "lucide-react";
 
 import {
   deleteTracker,
@@ -17,6 +18,7 @@ import {
   type UpdateTrackerPayload,
 } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
+import { EmptyState } from "@/components/empty-state";
 import { TrackerEditForm } from "@/components/tracker-edit-form";
 import {
   AlertDialog,
@@ -400,9 +402,11 @@ export function TrackerDetailClient({
           </CardHeader>
           <CardContent className="space-y-4">
             {changeLogs.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No change history yet.
-              </p>
+              <EmptyState
+                icon={<HistoryIcon className="size-5" />}
+                title="No change history yet"
+                description="Once this tracker detects a content update, the previous and new values will appear here."
+              />
             ) : (
               changeLogs.map((log) => (
                 <div

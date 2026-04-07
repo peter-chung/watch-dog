@@ -1,14 +1,17 @@
 import Link from "next/link";
+import { SearchCheckIcon } from "lucide-react";
 
 import { Tracker } from "@/lib/api";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/empty-state";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 
 type TrackerListProps = {
   trackers: Tracker[];
@@ -17,14 +20,16 @@ type TrackerListProps = {
 export function TrackerList({ trackers }: TrackerListProps) {
   if (trackers.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>No trackers yet</CardTitle>
-          <CardDescription>
-            Create your first tracker to start monitoring a webpage.
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <EmptyState
+        icon={<SearchCheckIcon className="size-5" />}
+        title="No trackers yet"
+        description="Create your first tracker to start monitoring a webpage and receive change alerts."
+        action={
+          <Button asChild>
+            <Link href="/trackers/new">Create Your First Tracker</Link>
+          </Button>
+        }
+      />
     );
   }
 

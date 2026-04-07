@@ -2,7 +2,6 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.database.supabase import supabase
 from app.routes.trackers import router as trackers_router
 from app.services.scheduler import start_scheduler, scheduler
 

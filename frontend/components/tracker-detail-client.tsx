@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import {
   deleteTracker,
@@ -162,6 +163,9 @@ export function TrackerDetailClient({
         return;
       }
 
+      toast.error("Manual check failed", {
+        description: message,
+      });
       setError(message);
     } finally {
       setIsRunningCheck(false);
@@ -173,12 +177,18 @@ export function TrackerDetailClient({
 
     try {
       await deleteTracker(trackerId);
+      toast.success("Tracker deleted", {
+        description: "The tracker has been removed from your dashboard.",
+      });
       setIsDeleteDialogOpen(false);
       router.push("/");
       router.refresh();
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to delete tracker.";
+      toast.error("Could not delete tracker", {
+        description: message,
+      });
       setError(message);
       setIsDeleteDialogOpen(false);
     } finally {

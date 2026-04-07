@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { createTracker, testTracker } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -36,15 +37,11 @@ export function TrackerForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
 
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [preview, setPreview] = useState("");
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    setError("");
-    setSuccessMessage("");
     setIsSubmitting(true);
 
     try {
@@ -53,26 +50,28 @@ export function TrackerForm() {
         selector,
       });
 
-      setSuccessMessage("Tracker created successfully.");
       setPreview("");
 
       setUrl("");
       setSelector("");
+      toast.success("Tracker created", {
+        description: "Your tracker has been saved and added to the dashboard.",
+      });
 
       router.push("/");
       router.refresh();
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Something went wrong.";
-      setError(message);
+      toast.error("Could not create tracker", {
+        description: message,
+      });
     } finally {
       setIsSubmitting(false);
     }
   }
 
   async function handleTest() {
-    setError("");
-    setSuccessMessage("");
     setPreview("");
     setIsTesting(true);
 
@@ -94,7 +93,9 @@ export function TrackerForm() {
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Something went wrong.";
-      setError(message);
+      toast.error("Selector test failed", {
+        description: message,
+      });
     } finally {
       setIsTesting(false);
     }
@@ -153,12 +154,6 @@ export function TrackerForm() {
               {isSubmitting ? "Creating..." : "Create Tracker"}
             </Button>
           </div>
-
-          {error ? <p className="text-sm text-red-500">{error}</p> : null}
-
-          {successMessage ? (
-            <p className="text-sm text-green-600">{successMessage}</p>
-          ) : null}
 
           {preview ? (
             <div className="rounded-lg border bg-muted/30 p-4">

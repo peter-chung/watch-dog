@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { type Tracker, type UpdateTrackerPayload } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -42,8 +43,6 @@ export function TrackerEditForm({
   const [url, setUrl] = useState(tracker.url);
   const [selector, setSelector] = useState(tracker.selector);
   const [isActive, setIsActive] = useState(tracker.is_active);
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     setUrl(tracker.url);
@@ -53,8 +52,6 @@ export function TrackerEditForm({
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError("");
-    setSuccessMessage("");
 
     try {
       if (!url.trim()) {
@@ -71,11 +68,15 @@ export function TrackerEditForm({
         is_active: isActive,
       });
 
-      setSuccessMessage("Tracker updated successfully.");
+      toast.success("Tracker updated", {
+        description: "Your tracker settings have been saved.",
+      });
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to update tracker.";
-      setError(message);
+      toast.error("Could not update tracker", {
+        description: message,
+      });
     }
   }
 
@@ -129,12 +130,6 @@ export function TrackerEditForm({
               {isSaving ? "Saving..." : "Save Changes"}
             </Button>
           </div>
-
-          {error ? <p className="text-sm text-destructive">{error}</p> : null}
-
-          {successMessage ? (
-            <p className="text-sm text-green-600">{successMessage}</p>
-          ) : null}
         </form>
       </CardContent>
     </Card>

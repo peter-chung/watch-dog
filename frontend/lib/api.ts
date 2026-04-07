@@ -1,7 +1,47 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { createClient } from "@/lib/supabase/client";
 
-if (!API_URL) {
-  throw new Error("NEXT_PUBLIC_API_URL is not defined");
+function getApiUrl() {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  if (!apiUrl) {
+    throw new Error("NEXT_PUBLIC_API_URL is not defined");
+  }
+
+  return apiUrl;
+}
+
+async function getAccessToken() {
+  const supabase = createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  return session?.access_token ?? null;
+}
+
+export async function apiFetch(path: string, init: RequestInit = {}) {
+  const token = await getAccessToken();
+  const headers = new Headers(init.headers ?? {});
+
+  headers.set("Content-Type", "application/json");
+
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  return fetch(`${getApiUrl()}${path}`, {
+    ...init,
+    headers,
+  });
+}
+
+async function parseError(response: Response, fallbackMessage: string) {
+  try {
+    const errorData = await response.json();
+    return errorData.detail ?? fallbackMessage;
+  } catch {
+    return fallbackMessage;
+  }
 }
 
 export type CreateTrackerPayload = {
@@ -24,62 +64,38 @@ export type Tracker = {
 };
 
 export async function createTracker(payload: CreateTrackerPayload) {
-  const response = await fetch(`${API_URL}/trackers`, {
+  const response = await apiFetch("/trackers", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
-    let message = "Failed to create tracker";
-
-    try {
-      const errorData = await response.json();
-      message = errorData.detail ?? message;
-    } catch {
-      // keep default message
-    }
-
-    throw new Error(message);
+    throw new Error(await parseError(response, "Failed to create tracker"));
   }
 
   return response.json();
 }
 
 export async function getTrackers(): Promise<Tracker[]> {
-  const response = await fetch(`${API_URL}/trackers`, {
+  const response = await apiFetch("/trackers", {
     cache: "no-store",
   });
 
   if (!response.ok) {
-    throw new Error("Failed to fetch trackers");
+    throw new Error(await parseError(response, "Failed to fetch trackers"));
   }
 
   return response.json();
 }
 
 export async function testTracker(payload: { url: string; selector: string }) {
-  const response = await fetch(`${API_URL}/trackers/test`, {
+  const response = await apiFetch("/trackers/test", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
-    let message = "Failed to test tracker";
-
-    try {
-      const errorData = await response.json();
-      message = errorData.detail ?? message;
-    } catch {
-      //
-    }
-
-    throw new Error(message);
+    throw new Error(await parseError(response, "Failed to test tracker"));
   }
 
   return response.json() as Promise<{ preview: string }>;

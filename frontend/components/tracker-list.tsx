@@ -8,6 +8,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 type TrackerListProps = {
   trackers: Tracker[];
@@ -48,15 +49,9 @@ export function TrackerList({ trackers }: TrackerListProps) {
                 </CardDescription>
               </div>
 
-              <span
-                className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
-                  tracker.is_active
-                    ? "bg-green-100 text-green-700"
-                    : "bg-gray-100 text-gray-700"
-                }`}
-              >
+              <Badge variant={tracker.is_active ? "default" : "secondary"}>
                 {tracker.is_active ? "Active" : "Inactive"}
-              </span>
+              </Badge>
             </div>
           </CardHeader>
 

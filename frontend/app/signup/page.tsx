@@ -5,8 +5,17 @@ import { startTransition, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/client";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function Page() {
   const router = useRouter();
@@ -64,60 +73,68 @@ export default function Page() {
 
   return (
     <section className="mx-auto flex min-h-[calc(100vh-12rem)] w-full max-w-md items-center">
-      <div className="w-full space-y-6 rounded-2xl border bg-card p-6 shadow-sm">
-        <div className="space-y-2">
-          <h1 className="text-2xl font-semibold tracking-tight">Sign Up</h1>
-          <p className="text-sm text-muted-foreground">
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="text-2xl">Sign Up</CardTitle>
+          <CardDescription>
             Create an account to start managing trackers.
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent className="space-y-6">
+          <form onSubmit={handleSignup} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                autoComplete="new-password"
+                placeholder="Create a password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Creating account..." : "Sign Up"}
+            </Button>
+
+            {error ? (
+              <Alert variant="destructive">
+                <AlertTitle>Sign up failed</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            ) : null}
+            {message ? (
+              <Alert>
+                <AlertTitle>Account created</AlertTitle>
+                <AlertDescription>{message}</AlertDescription>
+              </Alert>
+            ) : null}
+          </form>
+
+          <p className="text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <Link href="/login" className="font-medium text-foreground underline">
+              Login
+            </Link>
           </p>
-        </div>
-
-        <form onSubmit={handleSignup} className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium">
-              Email
-            </label>
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium">
-              Password
-            </label>
-            <Input
-              id="password"
-              type="password"
-              autoComplete="new-password"
-              placeholder="Create a password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? "Creating account..." : "Sign Up"}
-          </Button>
-
-          {error ? <p className="text-sm text-destructive">{error}</p> : null}
-          {message ? <p className="text-sm text-green-600">{message}</p> : null}
-        </form>
-
-        <p className="text-sm text-muted-foreground">
-          Already have an account?{" "}
-          <Link href="/login" className="font-medium text-foreground underline">
-            Login
-          </Link>
-        </p>
-      </div>
+        </CardContent>
+      </Card>
     </section>
   );
 }

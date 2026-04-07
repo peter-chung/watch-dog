@@ -7,8 +7,9 @@ import { useRouter } from "next/navigation";
 import { getTrackers, type Tracker } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
 import { TrackerList } from "@/components/tracker-list";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function DashboardClient() {
   const router = useRouter();
@@ -75,12 +76,19 @@ export function DashboardClient() {
       </div>
 
       {isLoading ? (
-        <div className="flex min-h-[20vh] items-center justify-center">
-          <Spinner className="size-5" />
+        <div className="grid gap-4">
+          <Skeleton className="h-28 w-full rounded-xl" />
+          <Skeleton className="h-28 w-full rounded-xl" />
+          <Skeleton className="h-28 w-full rounded-xl" />
         </div>
       ) : null}
 
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      {error ? (
+        <Alert variant="destructive">
+          <AlertTitle>Failed to load trackers</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : null}
 
       {!isLoading && !error ? <TrackerList trackers={trackers} /> : null}
     </section>

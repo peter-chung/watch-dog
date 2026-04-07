@@ -17,8 +17,19 @@ import {
   type UpdateTrackerPayload,
 } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
-import { ConfirmDialog } from "@/components/confirm-dialog";
 import { TrackerEditForm } from "@/components/tracker-edit-form";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -27,7 +38,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function formatDateTime(value: string | null) {
   if (!value) {
@@ -41,6 +52,10 @@ function formatDateTime(value: string | null) {
   }
 
   return date.toLocaleString();
+}
+
+function isAbortError(error: unknown) {
+  return error instanceof DOMException && error.name === "AbortError";
 }
 
 type TrackerDetailClientProps = {
@@ -90,12 +105,13 @@ export function TrackerDetailClient({
 
   useEffect(() => {
     let isMounted = true;
+    const controller = new AbortController();
 
     async function loadTrackerDetail() {
       try {
         const [trackerData, logData] = await Promise.all([
-          getTrackerById(trackerId),
-          getTrackerChangeLogs(trackerId),
+          getTrackerById(trackerId, { signal: controller.signal }),
+          getTrackerChangeLogs(trackerId, { signal: controller.signal }),
         ]);
 
         if (!isMounted) {
@@ -106,6 +122,10 @@ export function TrackerDetailClient({
         setChangeLogs(logData);
         setError(null);
       } catch (err) {
+        if (isAbortError(err) || controller.signal.aborted) {
+          return;
+        }
+
         if (!isMounted) {
           return;
         }
@@ -129,6 +149,7 @@ export function TrackerDetailClient({
 
     return () => {
       isMounted = false;
+      controller.abort();
     };
   }, [handleAuthError, trackerId]);
 
@@ -198,8 +219,10 @@ export function TrackerDetailClient({
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[40vh] items-center justify-center">
-        <Spinner className="size-5" />
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-40" />
+        <Skeleton className="h-40 w-full rounded-xl" />
+        <Skeleton className="h-64 w-full rounded-xl" />
       </div>
     );
   }
@@ -210,7 +233,10 @@ export function TrackerDetailClient({
         <Button asChild variant="ghost">
           <Link href="/">Back to Dashboard</Link>
         </Button>
-        <p className="text-sm text-destructive">{error}</p>
+        <Alert variant="destructive">
+          <AlertTitle>Failed to load tracker</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       </section>
     );
   }
@@ -238,19 +264,18 @@ export function TrackerDetailClient({
               </p>
             </div>
 
-            <span
-              className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${
-                tracker.is_active
-                  ? "bg-green-100 text-green-700"
-                  : "bg-gray-100 text-gray-700"
-              }`}
-            >
+            <Badge variant={tracker.is_active ? "default" : "secondary"}>
               {tracker.is_active ? "Active" : "Inactive"}
-            </span>
+            </Badge>
           </div>
         </div>
 
-        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        {error ? (
+          <Alert variant="destructive">
+            <AlertTitle>Action failed</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        ) : null}
 
         <Card>
           <CardHeader>
@@ -321,25 +346,28 @@ export function TrackerDetailClient({
             </Button>
 
             {checkResult ? (
-              <div className="space-y-4 rounded-xl border bg-muted/30 p-4 text-sm">
-                <div className="space-y-1">
-                  <p className="font-medium text-foreground">
-                    Result: {checkResult.status}
-                  </p>
-                  <p className="text-muted-foreground">
-                    {checkResult.message}
-                  </p>
-                  {typeof checkResult.email_sent === "boolean" ? (
-                    <p className="text-muted-foreground">
-                      Email sent: {checkResult.email_sent ? "Yes" : "No"}
-                    </p>
-                  ) : null}
-                  {checkResult.email_error ? (
-                    <p className="text-destructive">
-                      Email error: {checkResult.email_error}
-                    </p>
-                  ) : null}
-                </div>
+              <div className="space-y-4">
+                <Alert
+                  variant={
+                    checkResult.status === "changed" &&
+                    checkResult.email_error == null
+                      ? "default"
+                      : checkResult.email_error
+                        ? "destructive"
+                        : "default"
+                  }
+                >
+                  <AlertTitle>Result: {checkResult.status}</AlertTitle>
+                  <AlertDescription>
+                    <p>{checkResult.message}</p>
+                    {typeof checkResult.email_sent === "boolean" ? (
+                      <p>Email sent: {checkResult.email_sent ? "Yes" : "No"}</p>
+                    ) : null}
+                    {checkResult.email_error ? (
+                      <p>Email error: {checkResult.email_error}</p>
+                    ) : null}
+                  </AlertDescription>
+                </Alert>
 
                 {checkResult.old_content || checkResult.new_content ? (
                   <div className="grid gap-4 md:grid-cols-2">
@@ -426,19 +454,30 @@ export function TrackerDetailClient({
         </Card>
       </section>
 
-      <ConfirmDialog
-        isOpen={isDeleteDialogOpen}
-        title="Delete this tracker?"
-        description="This action cannot be undone. The tracker will be removed from your dashboard."
-        confirmLabel="Delete Tracker"
-        isConfirming={isDeleting}
-        onConfirm={handleDelete}
-        onCancel={() => setIsDeleteDialogOpen(false)}
-      >
-        <p className="break-all rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
-          {tracker.url}
-        </p>
-      </ConfirmDialog>
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this tracker?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. The tracker will be removed from
+              your dashboard.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="break-all rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
+            {tracker.url}
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={isDeleting}
+              onClick={handleDelete}
+            >
+              {isDeleting ? "Deleting..." : "Delete Tracker"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

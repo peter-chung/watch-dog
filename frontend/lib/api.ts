@@ -111,9 +111,13 @@ export async function getTrackers(): Promise<Tracker[]> {
   return response.json();
 }
 
-export async function getTrackerById(trackerId: string): Promise<Tracker> {
+export async function getTrackerById(
+  trackerId: string,
+  init: RequestInit = {}
+): Promise<Tracker> {
   const response = await apiFetch(`/trackers/${trackerId}`, {
     cache: "no-store",
+    ...init,
   });
 
   if (!response.ok) {
@@ -124,10 +128,12 @@ export async function getTrackerById(trackerId: string): Promise<Tracker> {
 }
 
 export async function getTrackerChangeLogs(
-  trackerId: string
+  trackerId: string,
+  init: RequestInit = {}
 ): Promise<ChangeLog[]> {
   const response = await apiFetch(`/trackers/${trackerId}/change-logs`, {
     cache: "no-store",
+    ...init,
   });
 
   if (!response.ok) {

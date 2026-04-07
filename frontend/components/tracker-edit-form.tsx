@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 function normalizeUrl(url: string) {
   const trimmed = url.trim();
@@ -113,17 +114,20 @@ export function TrackerEditForm({
             />
           </div>
 
-          <label className="flex items-center gap-3 rounded-lg border p-3 text-sm">
-            <input
-              type="checkbox"
+          <div className="flex items-center justify-between rounded-lg border p-3 text-sm">
+            <div className="space-y-1">
+              <Label htmlFor="edit-active">Monitoring Status</Label>
+              <p className="text-xs text-muted-foreground">
+                {isActive ? "Tracker is active" : "Tracker is paused"}
+              </p>
+            </div>
+            <Switch
+              id="edit-active"
               checked={isActive}
-              onChange={(event) => setIsActive(event.target.checked)}
-              className="size-4"
+              onCheckedChange={setIsActive}
+              aria-label="Toggle tracker active state"
             />
-            <span>
-              {isActive ? "Tracker is active" : "Tracker is paused"}
-            </span>
-          </label>
+          </div>
 
           <div className="flex flex-wrap items-center gap-3">
             <Button type="submit" disabled={isSaving}>

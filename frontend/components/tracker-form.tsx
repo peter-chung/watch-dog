@@ -32,7 +32,6 @@ export function TrackerForm() {
 
   const [url, setUrl] = useState("");
   const [selector, setSelector] = useState("");
-  const [email, setEmail] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
@@ -52,7 +51,6 @@ export function TrackerForm() {
       await createTracker({
         url: normalizeUrl(url),
         selector,
-        email,
       });
 
       setSuccessMessage("Tracker created successfully.");
@@ -60,7 +58,6 @@ export function TrackerForm() {
 
       setUrl("");
       setSelector("");
-      setEmail("");
 
       router.push("/");
       router.refresh();
@@ -108,7 +105,8 @@ export function TrackerForm() {
       <CardHeader>
         <CardTitle>Create Tracker</CardTitle>
         <CardDescription>
-          Add a webpage URL, the CSS selector to watch, and the email to notify.
+          Add a webpage URL and CSS selector to watch. Alerts go to your account
+          email automatically.
         </CardDescription>
       </CardHeader>
 
@@ -137,18 +135,6 @@ export function TrackerForm() {
               placeholder=".price or #stock-status"
               value={selector}
               onChange={(event) => setSelector(event.target.value)}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="email">Notification Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
               required
             />
           </div>

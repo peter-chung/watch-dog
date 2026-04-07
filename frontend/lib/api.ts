@@ -47,7 +47,6 @@ async function parseError(response: Response, fallbackMessage: string) {
 export type CreateTrackerPayload = {
   url: string;
   selector: string;
-  email: string;
 };
 
 export type Tracker = {

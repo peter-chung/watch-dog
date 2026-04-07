@@ -1,11 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.dependencies.auth import get_current_user_id
-from app.schemas.tracker import TrackerCreate, TrackerUpdate, TrackerTestRequest
+from app.dependencies.auth import AuthenticatedUser, get_current_user, get_current_user_id
+from app.schemas.tracker import (
+    ChangeLogResponse,
+    TrackerCreate,
+    TrackerTestRequest,
+    TrackerUpdate,
+)
 from app.services.fetcher import fetch_html
 from app.services.parser import extract_content
 from app.services.trackers import (
     create_tracker_record,
+    delete_tracker_record_for_user,
+    get_change_logs_for_tracker_for_user,
     get_all_trackers_for_user,
     get_tracker_by_id_record_for_user,
     update_tracker_record_for_user,
@@ -16,13 +23,15 @@ router = APIRouter(prefix="/trackers", tags=["trackers"])
 
 
 @router.post("")
-def create_tracker(tracker: TrackerCreate, user_id: str = Depends(get_current_user_id)):
+def create_tracker(
+    tracker: TrackerCreate, user: AuthenticatedUser = Depends(get_current_user)
+):
     payload = {
         "url": str(tracker.url),
         "selector": tracker.selector,
-        "email": tracker.email,
+        "email": user["email"],
         "is_active": True,
-        "user_id": user_id,
+        "user_id": user["id"],
     }
 
     data = create_tracker_record(payload)
@@ -48,6 +57,18 @@ def get_tracker_by_id(tracker_id: str, user_id: str = Depends(get_current_user_i
     return data[0]
 
 
+@router.get("/{tracker_id}/change-logs", response_model=list[ChangeLogResponse])
+def get_tracker_change_logs(
+    tracker_id: str, user_id: str = Depends(get_current_user_id)
+):
+    tracker = get_tracker_by_id_record_for_user(tracker_id, user_id)
+
+    if not tracker:
+        raise HTTPException(status_code=404, detail="Tracker not found")
+
+    return get_change_logs_for_tracker_for_user(tracker_id, user_id)
+
+
 @router.patch("/{tracker_id}")
 def update_tracker(
     tracker_id: str,
@@ -65,6 +86,16 @@ def update_tracker(
         raise HTTPException(status_code=404, detail="Tracker not found")
 
     return data[0]
+
+
+@router.delete("/{tracker_id}")
+def delete_tracker(tracker_id: str, user_id: str = Depends(get_current_user_id)):
+    data = delete_tracker_record_for_user(tracker_id, user_id)
+
+    if not data:
+        raise HTTPException(status_code=404, detail="Tracker not found")
+
+    return {"deleted": True, "tracker_id": tracker_id}
 
 
 @router.post("/test")

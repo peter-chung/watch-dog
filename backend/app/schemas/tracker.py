@@ -6,7 +6,6 @@ from pydantic import BaseModel, EmailStr, HttpUrl, field_validator
 class TrackerCreate(BaseModel):
     url: HttpUrl
     selector: str
-    email: EmailStr
 
     @field_validator("selector")
     @classmethod
@@ -44,6 +43,14 @@ class TrackerResponse(BaseModel):
     is_active: bool
     created_at: str
     updated_at: Optional[str] = None
+
+
+class ChangeLogResponse(BaseModel):
+    id: str
+    tracker_id: str
+    old_content: str
+    new_content: str
+    changed_at: str
 
 
 class TrackerTestRequest(BaseModel):

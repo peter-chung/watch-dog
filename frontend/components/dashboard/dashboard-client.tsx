@@ -61,8 +61,8 @@ export function DashboardClient() {
   }, [router]);
 
   return (
-    <section className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
+    <section className="space-y-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-2">
           <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground">
@@ -76,10 +76,10 @@ export function DashboardClient() {
       </div>
 
       {isLoading ? (
-        <div className="grid gap-4">
-          <Skeleton className="h-28 w-full rounded-xl" />
-          <Skeleton className="h-28 w-full rounded-xl" />
-          <Skeleton className="h-28 w-full rounded-xl" />
+        <div className="grid gap-5">
+          <Skeleton className="h-44 w-full rounded-xl" />
+          <Skeleton className="h-44 w-full rounded-xl" />
+          <Skeleton className="h-44 w-full rounded-xl" />
         </div>
       ) : null}
 

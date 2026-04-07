@@ -102,8 +102,8 @@ export function TrackerForm() {
   }
 
   return (
-    <Card className="max-w-2xl">
-      <CardHeader>
+    <Card className="max-w-3xl border-border/70 pt-0">
+      <CardHeader className="border-b bg-muted/20 px-4 py-4">
         <CardTitle>Create Tracker</CardTitle>
         <CardDescription>
           Add a webpage URL and CSS selector to watch. Alerts go to your account
@@ -111,8 +111,8 @@ export function TrackerForm() {
         </CardDescription>
       </CardHeader>
 
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+      <CardContent className="pt-6">
+        <form onSubmit={handleSubmit} className="space-y-7">
           <div className="space-y-2">
             <Label htmlFor="url">URL</Label>
             <Input
@@ -140,7 +140,7 @@ export function TrackerForm() {
             />
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap items-center gap-3 border-t pt-1">
             <Button
               type="button"
               variant="outline"
@@ -156,11 +156,11 @@ export function TrackerForm() {
           </div>
 
           {preview ? (
-            <div className="rounded-lg border bg-muted/30 p-4">
-              <p className="mb-2 text-sm font-medium text-foreground">
+            <div className="space-y-2 rounded-xl border bg-muted/25 p-4">
+              <p className="text-sm font-medium text-foreground">
                 Preview
               </p>
-              <p className="text-sm text-muted-foreground break-words">
+              <p className="break-words text-sm leading-6 text-muted-foreground">
                 {preview}
               </p>
             </div>

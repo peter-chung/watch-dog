@@ -35,6 +35,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -249,8 +250,8 @@ export function TrackerDetailClient({
 
   return (
     <>
-      <section className="space-y-6">
-        <div className="space-y-4">
+      <section className="space-y-8">
+        <div className="space-y-5">
           <Button asChild variant="ghost">
             <Link href="/">Back to Dashboard</Link>
           </Button>
@@ -279,45 +280,57 @@ export function TrackerDetailClient({
           </Alert>
         ) : null}
 
-        <Card>
-          <CardHeader>
+        <Card className="border-border/70 pt-0">
+          <CardHeader className="border-b bg-muted/20 px-4 py-4">
             <CardTitle>Tracker Metadata</CardTitle>
             <CardDescription>
               Current configuration and recent activity for this tracker.
             </CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-4 text-sm md:grid-cols-2">
-            <div>
-              <p className="font-medium text-foreground">Selector</p>
-              <p className="break-all font-mono text-xs text-muted-foreground">
+          <CardContent className="grid gap-3 pt-5 text-sm md:grid-cols-2 xl:grid-cols-3">
+            <div className="space-y-2 rounded-lg bg-muted/35 p-4">
+              <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
+                Selector
+              </p>
+              <p className="break-all font-mono text-xs leading-5 text-foreground">
                 {tracker.selector}
               </p>
             </div>
-            <div>
-              <p className="font-medium text-foreground">Alert Email</p>
-              <p className="text-muted-foreground">{tracker.email}</p>
+            <div className="space-y-2 rounded-lg bg-muted/35 p-4">
+              <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
+                Alert email
+              </p>
+              <p className="break-all text-foreground">{tracker.email}</p>
             </div>
-            <div>
-              <p className="font-medium text-foreground">Created</p>
-              <p className="text-muted-foreground">
+            <div className="space-y-2 rounded-lg bg-muted/35 p-4">
+              <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
+                Created
+              </p>
+              <p className="text-foreground">
                 {formatDateTime(tracker.created_at)}
               </p>
             </div>
-            <div>
-              <p className="font-medium text-foreground">Updated</p>
-              <p className="text-muted-foreground">
+            <div className="space-y-2 rounded-lg bg-muted/35 p-4">
+              <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
+                Updated
+              </p>
+              <p className="text-foreground">
                 {formatDateTime(tracker.updated_at ?? null)}
               </p>
             </div>
-            <div>
-              <p className="font-medium text-foreground">Last Checked</p>
-              <p className="text-muted-foreground">
+            <div className="space-y-2 rounded-lg bg-muted/35 p-4">
+              <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
+                Last checked
+              </p>
+              <p className="text-foreground">
                 {formatDateTime(tracker.last_checked_at)}
               </p>
             </div>
-            <div>
-              <p className="font-medium text-foreground">Last Changed</p>
-              <p className="text-muted-foreground">
+            <div className="space-y-2 rounded-lg bg-muted/35 p-4">
+              <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
+                Last changed
+              </p>
+              <p className="text-foreground">
                 {formatDateTime(tracker.last_changed_at)}
               </p>
             </div>
@@ -330,14 +343,14 @@ export function TrackerDetailClient({
           onSave={handleSave}
         />
 
-        <Card>
-          <CardHeader>
+        <Card className="border-border/70 pt-0">
+          <CardHeader className="border-b bg-muted/20 px-4 py-4">
             <CardTitle>Manual Check</CardTitle>
             <CardDescription>
               Run a check now and refresh this tracker with the latest result.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5 pt-5">
             <Button
               type="button"
               variant="outline"
@@ -375,14 +388,14 @@ export function TrackerDetailClient({
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <p className="font-medium text-foreground">Old Content</p>
-                      <div className="rounded-lg bg-background p-3 text-muted-foreground whitespace-pre-wrap break-words">
+                      <div className="rounded-xl border bg-muted/20 p-4 text-muted-foreground whitespace-pre-wrap break-words">
                         {checkResult.old_content || "Empty"}
                       </div>
                     </div>
 
                     <div className="space-y-2">
                       <p className="font-medium text-foreground">New Content</p>
-                      <div className="rounded-lg bg-background p-3 text-muted-foreground whitespace-pre-wrap break-words">
+                      <div className="rounded-xl border bg-muted/20 p-4 text-muted-foreground whitespace-pre-wrap break-words">
                         {checkResult.new_content || "Empty"}
                       </div>
                     </div>
@@ -393,14 +406,14 @@ export function TrackerDetailClient({
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
+        <Card className="border-border/70 pt-0">
+          <CardHeader className="border-b bg-muted/20 px-4 py-4">
             <CardTitle>Change History</CardTitle>
             <CardDescription>
               Previous content snapshots captured for this tracker.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-5">
             {changeLogs.length === 0 ? (
               <EmptyState
                 icon={<HistoryIcon className="size-5" />}
@@ -411,7 +424,7 @@ export function TrackerDetailClient({
               changeLogs.map((log) => (
                 <div
                   key={log.id}
-                  className="space-y-4 rounded-xl border p-4 text-sm"
+                  className="space-y-4 rounded-xl border bg-muted/15 p-4 text-sm shadow-sm"
                 >
                   <p className="font-medium text-foreground">
                     {formatDateTime(log.changed_at)}
@@ -420,14 +433,14 @@ export function TrackerDetailClient({
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <p className="font-medium text-foreground">Old Content</p>
-                      <div className="rounded-lg bg-muted/50 p-3 text-muted-foreground whitespace-pre-wrap break-words">
+                      <div className="rounded-xl border bg-background p-4 text-muted-foreground whitespace-pre-wrap break-words">
                         {log.old_content || "Empty"}
                       </div>
                     </div>
 
                     <div className="space-y-2">
                       <p className="font-medium text-foreground">New Content</p>
-                      <div className="rounded-lg bg-muted/50 p-3 text-muted-foreground whitespace-pre-wrap break-words">
+                      <div className="rounded-xl border bg-background p-4 text-muted-foreground whitespace-pre-wrap break-words">
                         {log.new_content || "Empty"}
                       </div>
                     </div>
@@ -438,14 +451,17 @@ export function TrackerDetailClient({
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
+        <Card className="border-destructive/30 pt-0">
+          <CardHeader className="border-b bg-destructive/5 px-4 py-4">
+            <CardAction>
+              <Badge variant="secondary">Danger Zone</Badge>
+            </CardAction>
             <CardTitle>Delete Tracker</CardTitle>
             <CardDescription>
               Permanently remove this tracker and stop future checks.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-5">
             <Button
               type="button"
               variant="destructive"

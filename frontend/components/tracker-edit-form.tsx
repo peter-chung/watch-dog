@@ -82,15 +82,15 @@ export function TrackerEditForm({
   }
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="border-border/70 pt-0">
+      <CardHeader className="border-b bg-muted/20 px-4 py-4">
         <CardTitle>Edit Tracker</CardTitle>
         <CardDescription>
           Update the page target, selector, or monitoring status.
         </CardDescription>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="edit-url">URL</Label>
@@ -114,7 +114,7 @@ export function TrackerEditForm({
             />
           </div>
 
-          <div className="flex items-center justify-between rounded-lg border p-3 text-sm">
+          <div className="flex items-center justify-between rounded-xl border bg-muted/20 p-4 text-sm">
             <div className="space-y-1">
               <Label htmlFor="edit-active">Monitoring Status</Label>
               <p className="text-xs text-muted-foreground">

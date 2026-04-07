@@ -49,6 +49,12 @@ export type CreateTrackerPayload = {
   selector: string;
 };
 
+export type UpdateTrackerPayload = {
+  url?: string;
+  selector?: string;
+  is_active?: boolean;
+};
+
 export type Tracker = {
   id: string;
   url: string;
@@ -60,6 +66,14 @@ export type Tracker = {
   is_active: boolean;
   created_at: string;
   updated_at?: string | null;
+};
+
+export type ChangeLog = {
+  id: string;
+  tracker_id: string;
+  old_content: string;
+  new_content: string;
+  changed_at: string;
 };
 
 export async function createTracker(payload: CreateTrackerPayload) {
@@ -85,6 +99,62 @@ export async function getTrackers(): Promise<Tracker[]> {
   }
 
   return response.json();
+}
+
+export async function getTrackerById(trackerId: string): Promise<Tracker> {
+  const response = await apiFetch(`/trackers/${trackerId}`, {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseError(response, "Failed to fetch tracker"));
+  }
+
+  return response.json();
+}
+
+export async function getTrackerChangeLogs(
+  trackerId: string
+): Promise<ChangeLog[]> {
+  const response = await apiFetch(`/trackers/${trackerId}/change-logs`, {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      await parseError(response, "Failed to fetch tracker change logs")
+    );
+  }
+
+  return response.json();
+}
+
+export async function updateTracker(
+  trackerId: string,
+  payload: UpdateTrackerPayload
+): Promise<Tracker> {
+  const response = await apiFetch(`/trackers/${trackerId}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseError(response, "Failed to update tracker"));
+  }
+
+  return response.json();
+}
+
+export async function deleteTracker(trackerId: string) {
+  const response = await apiFetch(`/trackers/${trackerId}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseError(response, "Failed to delete tracker"));
+  }
+
+  return response.json() as Promise<{ deleted: boolean; tracker_id: string }>;
 }
 
 export async function testTracker(payload: { url: string; selector: string }) {

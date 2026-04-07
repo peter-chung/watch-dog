@@ -77,6 +77,9 @@ def update_tracker(
 ):
     update_data = tracker_update.model_dump(exclude_unset=True)
 
+    if "url" in update_data:
+        update_data["url"] = str(update_data["url"])
+
     if not update_data:
         raise HTTPException(status_code=400, detail="No fields provided for update")
 

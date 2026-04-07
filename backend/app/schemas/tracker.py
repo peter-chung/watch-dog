@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr, HttpUrl, field_validator
+from pydantic import BaseModel, HttpUrl, field_validator
 
 
 class TrackerCreate(BaseModel):
@@ -17,9 +17,9 @@ class TrackerCreate(BaseModel):
 
 
 class TrackerUpdate(BaseModel):
+    url: Optional[HttpUrl] = None
     is_active: Optional[bool] = None
     selector: Optional[str] = None
-    email: Optional[EmailStr] = None
 
     @field_validator("selector")
     @classmethod

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Tracker } from "@/lib/api";
 import {
   Card,
@@ -33,7 +35,12 @@ export function TrackerList({ trackers }: TrackerListProps) {
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-1">
                 <CardTitle className="text-lg break-all">
-                  {tracker.url}
+                  <Link
+                    href={`/trackers/${tracker.id}`}
+                    className="transition-colors hover:text-primary"
+                  >
+                    {tracker.url}
+                  </Link>
                 </CardTitle>
                 <CardDescription>
                   Selector:{" "}
@@ -65,6 +72,14 @@ export function TrackerList({ trackers }: TrackerListProps) {
             <p>
               <span className="font-medium text-foreground">Last changed:</span>{" "}
               {tracker.last_changed_at ?? "Never"}
+            </p>
+            <p>
+              <Link
+                href={`/trackers/${tracker.id}`}
+                className="font-medium text-primary hover:underline"
+              >
+                View details
+              </Link>
             </p>
           </CardContent>
         </Card>

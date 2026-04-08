@@ -25,6 +25,17 @@ export function RequireAuth({ children }: RequireAuthProps) {
       } = await supabase.auth.getSession();
 
       if (!session) {
+        const { data } = await supabase.auth.refreshSession();
+
+        if (data.session) {
+          setIsAuthorized(true);
+          setIsLoading(false);
+          setIsRedirecting(false);
+          return;
+        }
+      }
+
+      if (!session) {
         setIsLoading(false);
         setIsRedirecting(true);
         router.replace("/login");
@@ -40,8 +51,8 @@ export function RequireAuth({ children }: RequireAuthProps) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT") {
         setIsAuthorized(false);
         setIsLoading(false);
         setIsRedirecting(true);
@@ -49,9 +60,11 @@ export function RequireAuth({ children }: RequireAuthProps) {
         return;
       }
 
-      setIsAuthorized(true);
-      setIsLoading(false);
-      setIsRedirecting(false);
+      if (session) {
+        setIsAuthorized(true);
+        setIsLoading(false);
+        setIsRedirecting(false);
+      }
     });
 
     return () => {

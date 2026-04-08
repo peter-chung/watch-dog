@@ -16,11 +16,19 @@ async function getAccessToken() {
     data: { session },
   } = await supabase.auth.getSession();
 
-  return session?.access_token ?? null;
+  if (session?.access_token) {
+    return session.access_token;
+  }
+
+  const { data } = await supabase.auth.refreshSession();
+  return data.session?.access_token ?? null;
 }
 
-export async function apiFetch(path: string, init: RequestInit = {}) {
-  const token = await getAccessToken();
+async function fetchWithToken(
+  path: string,
+  init: RequestInit,
+  token: string | null,
+) {
   const headers = new Headers(init.headers ?? {});
 
   headers.set("Content-Type", "application/json");
@@ -33,6 +41,25 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
     ...init,
     headers,
   });
+}
+
+export async function apiFetch(path: string, init: RequestInit = {}) {
+  const initialToken = await getAccessToken();
+  const response = await fetchWithToken(path, init, initialToken);
+
+  if (response.status !== 401) {
+    return response;
+  }
+
+  const supabase = createClient();
+  const { data } = await supabase.auth.refreshSession();
+  const refreshedToken = data.session?.access_token ?? null;
+
+  if (!refreshedToken) {
+    return response;
+  }
+
+  return fetchWithToken(path, init, refreshedToken);
 }
 
 async function parseError(response: Response, fallbackMessage: string) {

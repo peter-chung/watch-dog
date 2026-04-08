@@ -1,16 +1,10 @@
-import os
-import certifi
 import requests
+import truststore
 
-import urllib3
 from dotenv import load_dotenv
 
 load_dotenv()
-
-DISABLE_SSL_VERIFY = os.getenv("DISABLE_SSL_VERIFY", "false").lower() == "true"
-
-if DISABLE_SSL_VERIFY:
-    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+truststore.inject_into_ssl()
 
 
 def fetch_html(url: str) -> str:
@@ -26,8 +20,6 @@ def fetch_html(url: str) -> str:
         url,
         headers=headers,
         timeout=10,
-        # verify=certifi.where(),
-        verify=not DISABLE_SSL_VERIFY,  # Disable SSL verification (not recommended for production)
     )
     response.raise_for_status()
     return response.text

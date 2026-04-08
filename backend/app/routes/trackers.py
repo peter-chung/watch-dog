@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.dependencies.auth import AuthenticatedUser, get_current_user, get_current_user_id
@@ -20,6 +22,7 @@ from app.services.trackers import (
 from app.services.checker import check_tracker
 
 router = APIRouter(prefix="/trackers", tags=["trackers"])
+logger = logging.getLogger(__name__)
 
 
 @router.post("")
@@ -108,12 +111,11 @@ def test_tracker(tracker_test: TrackerTestRequest):
         return {"preview": preview}
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
-    # except Exception:
-    except Exception as exc:
+    except Exception:
+        logger.exception("Tracker test failed.")
         raise HTTPException(
             status_code=500,
-            # detail="Failed to fetch or parse the webpage.",
-            detail=f"Failed to fetch or parse the webpage: {str(exc)}",
+            detail="Failed to fetch or parse the webpage.",
         )
 
 
@@ -135,8 +137,9 @@ def run_tracker_check(tracker_id: str, user_id: str = Depends(get_current_user_i
             raise HTTPException(status_code=404, detail=message)
 
         raise HTTPException(status_code=400, detail=message)
-    except Exception as exc:
+    except Exception:
+        logger.exception("Manual tracker check failed for tracker_id=%s", tracker_id)
         raise HTTPException(
             status_code=500,
-            detail=f"Unexpected error while checking tracker: {str(exc)}",
+            detail="Unexpected error while checking tracker.",
         )

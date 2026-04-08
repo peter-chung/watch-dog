@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { HistoryIcon } from "lucide-react";
 
 import {
+  ApiError,
   deleteTracker,
   getTrackerById,
   getTrackerChangeLogs,
@@ -19,6 +20,7 @@ import {
 } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
 import { EmptyState } from "@/components/empty-state";
+import { NotFoundState } from "@/components/not-found-state";
 import { TrackerEditForm } from "@/components/tracker-edit-form";
 import {
   AlertDialog,
@@ -75,6 +77,7 @@ export function TrackerDetailClient({
     null
   );
   const [error, setError] = useState<string | null>(null);
+  const [isMissingTracker, setIsMissingTracker] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isRunningCheck, setIsRunningCheck] = useState(false);
@@ -104,6 +107,7 @@ export function TrackerDetailClient({
     setTracker(trackerData);
     setChangeLogs(logData);
     setError(null);
+    setIsMissingTracker(false);
   }
 
   useEffect(() => {
@@ -124,12 +128,19 @@ export function TrackerDetailClient({
         setTracker(trackerData);
         setChangeLogs(logData);
         setError(null);
+        setIsMissingTracker(false);
       } catch (err) {
         if (isAbortError(err) || controller.signal.aborted) {
           return;
         }
 
         if (!isMounted) {
+          return;
+        }
+
+        if (err instanceof ApiError && err.status === 404) {
+          setIsMissingTracker(true);
+          setError(null);
           return;
         }
 
@@ -241,6 +252,16 @@ export function TrackerDetailClient({
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       </section>
+    );
+  }
+
+  if (isMissingTracker) {
+    return (
+      <NotFoundState
+        badge="Tracker"
+        title="Tracker not found"
+        description="This tracker does not exist, may have been deleted, or may not belong to your account."
+      />
     );
   }
 

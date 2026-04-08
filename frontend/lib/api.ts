@@ -1,5 +1,15 @@
 import { createClient } from "@/lib/supabase/client";
 
+export class ApiError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
 function getApiUrl() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -119,7 +129,10 @@ export async function createTracker(payload: CreateTrackerPayload) {
   });
 
   if (!response.ok) {
-    throw new Error(await parseError(response, "Failed to create tracker"));
+    throw new ApiError(
+      await parseError(response, "Failed to create tracker"),
+      response.status
+    );
   }
 
   return response.json();
@@ -131,7 +144,10 @@ export async function getTrackers(): Promise<Tracker[]> {
   });
 
   if (!response.ok) {
-    throw new Error(await parseError(response, "Failed to fetch trackers"));
+    throw new ApiError(
+      await parseError(response, "Failed to fetch trackers"),
+      response.status
+    );
   }
 
   return response.json();
@@ -147,7 +163,10 @@ export async function getTrackerById(
   });
 
   if (!response.ok) {
-    throw new Error(await parseError(response, "Failed to fetch tracker"));
+    throw new ApiError(
+      await parseError(response, "Failed to fetch tracker"),
+      response.status
+    );
   }
 
   return response.json();
@@ -163,8 +182,9 @@ export async function getTrackerChangeLogs(
   });
 
   if (!response.ok) {
-    throw new Error(
-      await parseError(response, "Failed to fetch tracker change logs")
+    throw new ApiError(
+      await parseError(response, "Failed to fetch tracker change logs"),
+      response.status
     );
   }
 
@@ -181,7 +201,10 @@ export async function updateTracker(
   });
 
   if (!response.ok) {
-    throw new Error(await parseError(response, "Failed to update tracker"));
+    throw new ApiError(
+      await parseError(response, "Failed to update tracker"),
+      response.status
+    );
   }
 
   return response.json();
@@ -193,7 +216,10 @@ export async function deleteTracker(trackerId: string) {
   });
 
   if (!response.ok) {
-    throw new Error(await parseError(response, "Failed to delete tracker"));
+    throw new ApiError(
+      await parseError(response, "Failed to delete tracker"),
+      response.status
+    );
   }
 
   return response.json() as Promise<{ deleted: boolean; tracker_id: string }>;
@@ -207,7 +233,10 @@ export async function runTrackerCheck(
   });
 
   if (!response.ok) {
-    throw new Error(await parseError(response, "Failed to run tracker check"));
+    throw new ApiError(
+      await parseError(response, "Failed to run tracker check"),
+      response.status
+    );
   }
 
   return response.json();
@@ -220,7 +249,10 @@ export async function testTracker(payload: { url: string; selector: string }) {
   });
 
   if (!response.ok) {
-    throw new Error(await parseError(response, "Failed to test tracker"));
+    throw new ApiError(
+      await parseError(response, "Failed to test tracker"),
+      response.status
+    );
   }
 
   return response.json() as Promise<{ preview: string }>;

@@ -29,7 +29,6 @@ def create_tracker(
     payload = {
         "url": str(tracker.url),
         "selector": tracker.selector,
-        "email": user["email"],
         "is_active": True,
         "user_id": user["id"],
     }

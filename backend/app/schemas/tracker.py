@@ -36,7 +36,6 @@ class TrackerResponse(BaseModel):
     id: str
     url: str
     selector: str
-    email: str
     last_content: Optional[str] = None
     last_checked_at: Optional[str] = None
     last_changed_at: Optional[str] = None
@@ -48,9 +47,9 @@ class TrackerResponse(BaseModel):
 class ChangeLogResponse(BaseModel):
     id: str
     tracker_id: str
-    old_content: str
-    new_content: str
-    changed_at: str
+    old_content: Optional[str] = None
+    new_content: Optional[str] = None
+    changed_at: Optional[str] = None
 
 
 class TrackerTestRequest(BaseModel):

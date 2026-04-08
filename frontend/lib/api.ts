@@ -59,7 +59,6 @@ export type Tracker = {
   id: string;
   url: string;
   selector: string;
-  email: string;
   last_content: string | null;
   last_checked_at: string | null;
   last_changed_at: string | null;
@@ -71,9 +70,9 @@ export type Tracker = {
 export type ChangeLog = {
   id: string;
   tracker_id: string;
-  old_content: string;
-  new_content: string;
-  changed_at: string;
+  old_content: string | null;
+  new_content: string | null;
+  changed_at: string | null;
 };
 
 export type TrackerCheckResult = {

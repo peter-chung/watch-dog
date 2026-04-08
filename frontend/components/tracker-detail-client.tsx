@@ -298,10 +298,10 @@ export function TrackerDetailClient({
             </div>
             <div className="space-y-2 rounded-lg bg-muted/35 p-4">
               <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
-                Alert email
+                Notifications
               </p>
-              <p className="break-all text-sm leading-6 text-foreground">
-                {tracker.email}
+              <p className="text-sm leading-6 text-foreground">
+                Sent to your account email
               </p>
             </div>
             <div className="space-y-2 rounded-lg bg-muted/35 p-4">

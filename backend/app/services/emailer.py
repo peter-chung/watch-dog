@@ -8,11 +8,6 @@ load_dotenv()
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL", "Watchdog <onboarding@resend.dev>")
 
-if not RESEND_API_KEY:
-    raise ValueError("Missing RESEND_API_KEY in environment variables.")
-
-resend.api_key = RESEND_API_KEY
-
 
 def send_change_email(
     to_email: str,
@@ -21,6 +16,11 @@ def send_change_email(
     old_content: str,
     new_content: str,
 ):
+    if not RESEND_API_KEY:
+        raise RuntimeError("Missing RESEND_API_KEY in environment variables.")
+
+    resend.api_key = RESEND_API_KEY
+
     params: resend.Emails.SendParams = {
         "from": RESEND_FROM_EMAIL,
         "to": [to_email],

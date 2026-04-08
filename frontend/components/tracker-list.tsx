@@ -86,10 +86,10 @@ export function TrackerList({ trackers }: TrackerListProps) {
           <CardContent className="grid gap-3 pt-5 sm:grid-cols-3">
             <div className="space-y-1 rounded-lg bg-muted/35 p-3">
               <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
-                Alert email
+                Notifications
               </p>
-              <p className="break-all text-sm leading-6 text-foreground">
-                {tracker.email}
+              <p className="text-sm leading-6 text-foreground">
+                Sent to your account email
               </p>
             </div>
 

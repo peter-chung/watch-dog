@@ -8,6 +8,7 @@ from app.services.trackers import (
     get_tracker_by_id_record,
     update_tracker_record,
 )
+from app.services.users import get_user_email_by_id
 
 
 def check_tracker(tracker_id: str):
@@ -77,8 +78,9 @@ def check_tracker(tracker_id: str):
     email_error = None
 
     try:
+        recipient_email = get_user_email_by_id(tracker["user_id"])
         email_result = send_change_email(
-            to_email=tracker["email"],
+            to_email=recipient_email,
             tracker_url=tracker["url"],
             selector=tracker["selector"],
             old_content=last_content,

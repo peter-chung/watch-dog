@@ -15,6 +15,10 @@ def run_all_tracker_checks():
     for tracker in trackers:
         tracker_id = tracker["id"]
 
+        if not tracker.get("is_active", False):
+            print(f"[{tracker_id}] scheduled check skipped: tracker is inactive")
+            continue
+
         try:
             result = check_tracker(tracker_id)
             print(

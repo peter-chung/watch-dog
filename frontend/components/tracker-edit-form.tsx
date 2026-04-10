@@ -1,9 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { SearchCheckIcon } from "lucide-react";
 import { toast } from "sonner";
 
-import { type Tracker, type UpdateTrackerPayload } from "@/lib/api";
+import {
+  testTracker,
+  type Tracker,
+  type UpdateTrackerPayload,
+} from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -44,11 +49,14 @@ export function TrackerEditForm({
   const [url, setUrl] = useState(tracker.url);
   const [selector, setSelector] = useState(tracker.selector);
   const [isActive, setIsActive] = useState(tracker.is_active);
+  const [isTesting, setIsTesting] = useState(false);
+  const [preview, setPreview] = useState("");
 
   useEffect(() => {
     setUrl(tracker.url);
     setSelector(tracker.selector);
     setIsActive(tracker.is_active);
+    setPreview("");
   }, [tracker]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -78,6 +86,36 @@ export function TrackerEditForm({
       toast.error("Could not update tracker", {
         description: message,
       });
+    }
+  }
+
+  async function handleTest() {
+    setPreview("");
+    setIsTesting(true);
+
+    try {
+      if (!url.trim()) {
+        throw new Error("URL is required.");
+      }
+
+      if (!selector.trim()) {
+        throw new Error("CSS selector is required.");
+      }
+
+      const result = await testTracker({
+        url: normalizeUrl(url),
+        selector: selector.trim(),
+      });
+
+      setPreview(result.preview);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to test selector.";
+      toast.error("Could not test selector", {
+        description: message,
+      });
+    } finally {
+      setIsTesting(false);
     }
   }
 
@@ -114,7 +152,7 @@ export function TrackerEditForm({
             />
           </div>
 
-          <div className="flex items-center justify-between rounded-xl border bg-muted/20 p-4 text-sm">
+          <div className="flex max-w-xs items-start justify-between gap-4 text-sm">
             <div className="space-y-1">
               <Label htmlFor="edit-active">Monitoring Status</Label>
               <p className="text-xs leading-6 text-muted-foreground">
@@ -130,10 +168,30 @@ export function TrackerEditForm({
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <Button type="submit" disabled={isSaving}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleTest}
+              disabled={isSaving || isTesting}
+            >
+              <SearchCheckIcon className="size-4" />
+              {isTesting ? "Testing..." : "Test Selector"}
+            </Button>
+            <Button type="submit" disabled={isSaving || isTesting}>
               {isSaving ? "Saving..." : "Save Changes"}
             </Button>
           </div>
+
+          {preview ? (
+            <div className="space-y-2 rounded-xl border bg-muted/25 p-4">
+              <p className="text-sm font-medium tracking-tight text-foreground">
+                Preview
+              </p>
+              <p className="break-words text-sm leading-7 text-muted-foreground">
+                {preview}
+              </p>
+            </div>
+          ) : null}
         </form>
       </CardContent>
     </Card>

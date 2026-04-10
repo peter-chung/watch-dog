@@ -103,15 +103,15 @@ export function TrackerForm() {
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader>
+    <Card className="w-full border-border/70 pt-0">
+      <CardHeader className="border-b bg-muted/20 px-4 py-4">
         <CardTitle className="text-2xl">Create a new tracker</CardTitle>
         <CardDescription>
           Add a webpage URL and CSS selector to monitor for changes.
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 pt-6">
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="url">URL</Label>

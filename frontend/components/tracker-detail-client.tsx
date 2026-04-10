@@ -24,7 +24,6 @@ import {
   type UpdateTrackerPayload,
 } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
-import { EmptyState } from "@/components/empty-state";
 import { NotFoundState } from "@/components/not-found-state";
 import { TrackerEditForm } from "@/components/tracker-edit-form";
 import {
@@ -342,6 +341,7 @@ export function TrackerDetailClient({
                 <Button
                   type="button"
                   variant="destructive"
+                  className="border border-destructive/40"
                   onClick={() => setIsDeleteDialogOpen(true)}
                   disabled={isDeleting}
                 >
@@ -448,33 +448,44 @@ export function TrackerDetailClient({
           </CardHeader>
           <CardContent className="space-y-3 pt-5">
             {changeLogs.length === 0 ? (
-              <EmptyState
-                icon={<Clock3Icon className="size-5" />}
-                title="No change history yet"
-                description="When this tracker detects an update, the previous and new values will appear here."
-              />
+              <div className="rounded-lg border border-dashed bg-muted/10 px-4 py-6">
+                <div className="flex items-start gap-3">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-background text-muted-foreground ring-1 ring-border/60">
+                    <Clock3Icon className="size-4" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-foreground">
+                      No change history yet
+                    </p>
+                    <p className="text-sm leading-6 text-muted-foreground">
+                      When this tracker detects an update, the previous and new
+                      values will appear here.
+                    </p>
+                  </div>
+                </div>
+              </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[180px]">Date</TableHead>
-                    <TableHead>Before</TableHead>
-                    <TableHead>After</TableHead>
+                    <TableHead className="w-[140px] whitespace-normal">Date</TableHead>
+                    <TableHead className="whitespace-normal">Before</TableHead>
+                    <TableHead className="whitespace-normal">After</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {changeLogs.map((log) => (
                     <TableRow key={log.id}>
-                      <TableCell className="font-medium text-foreground">
+                      <TableCell className="align-top whitespace-normal font-medium text-foreground">
                         {formatDateTime(log.changed_at)}
                       </TableCell>
-                      <TableCell>
-                        <div className="max-h-32 overflow-y-auto rounded-md border bg-muted/10 px-3 py-2 font-mono text-xs leading-5 text-muted-foreground whitespace-pre-wrap break-words">
+                      <TableCell className="align-top whitespace-normal text-sm leading-6 text-foreground">
+                        <div className="whitespace-pre-wrap break-words sm:max-h-32 sm:overflow-y-auto">
                           {log.old_content || "Empty"}
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div className="max-h-32 overflow-y-auto rounded-md border bg-muted/10 px-3 py-2 font-mono text-xs leading-5 text-muted-foreground whitespace-pre-wrap break-words">
+                      <TableCell className="align-top whitespace-normal text-sm leading-6 text-foreground">
+                        <div className="whitespace-pre-wrap break-words sm:max-h-32 sm:overflow-y-auto">
                           {log.new_content || "Empty"}
                         </div>
                       </TableCell>

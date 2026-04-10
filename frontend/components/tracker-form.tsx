@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { PlusIcon, SearchCheckIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { createTracker, testTracker } from "@/lib/api";
@@ -102,17 +103,16 @@ export function TrackerForm() {
   }
 
   return (
-    <Card className="max-w-3xl border-border/70 pt-0">
-      <CardHeader className="border-b bg-muted/20 px-4 py-4">
-        <CardTitle>Create Tracker</CardTitle>
-        <CardDescription className="max-w-2xl">
-          Add a webpage URL and CSS selector to watch. Alerts go to your account
-          email automatically.
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="text-2xl">Create a new tracker</CardTitle>
+        <CardDescription>
+          Add a webpage URL and CSS selector to monitor for changes.
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="pt-6">
-        <form onSubmit={handleSubmit} className="space-y-7">
+      <CardContent className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="url">URL</Label>
             <Input
@@ -124,7 +124,7 @@ export function TrackerForm() {
               required
             />
             <p className="text-xs leading-6 text-muted-foreground">
-              You can enter example.com - we&apos;ll add https:// for you.
+              You can enter example.com. We&apos;ll add https:// for you.
             </p>
           </div>
 
@@ -138,19 +138,28 @@ export function TrackerForm() {
               onChange={(event) => setSelector(event.target.value)}
               required
             />
+            <p className="text-xs leading-6 text-muted-foreground">
+              Use the selector for the exact text or element you want to watch.
+            </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 border-t pt-1">
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
             <Button
               type="button"
               variant="outline"
               onClick={handleTest}
               disabled={isTesting || isSubmitting}
             >
+              <SearchCheckIcon className="size-4" />
               {isTesting ? "Testing..." : "Test Selector"}
             </Button>
 
-            <Button type="submit" disabled={isSubmitting || isTesting}>
+            <Button
+              type="submit"
+              className="w-full sm:w-auto"
+              disabled={isSubmitting || isTesting}
+            >
+              <PlusIcon className="size-4" />
               {isSubmitting ? "Creating..." : "Create Tracker"}
             </Button>
           </div>

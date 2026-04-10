@@ -4,7 +4,12 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { HistoryIcon } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  Clock3Icon,
+  PlayIcon,
+  Trash2Icon,
+} from "lucide-react";
 
 import {
   ApiError,
@@ -37,13 +42,20 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 function formatDateTime(value: string | null) {
   if (!value) {
@@ -61,6 +73,18 @@ function formatDateTime(value: string | null) {
 
 function isAbortError(error: unknown) {
   return error instanceof DOMException && error.name === "AbortError";
+}
+
+function getCheckStatusTone(status: string | undefined) {
+  if (status === "changed") {
+    return "default" as const;
+  }
+
+  if (status === "error") {
+    return "destructive" as const;
+  }
+
+  return "secondary" as const;
 }
 
 type TrackerDetailClientProps = {
@@ -273,24 +297,59 @@ export function TrackerDetailClient({
     <>
       <section className="space-y-8">
         <div className="space-y-5">
-          <Button asChild variant="ghost">
-            <Link href="/">Back to Dashboard</Link>
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/">
+              <ArrowLeftIcon className="size-4" />
+              Back to Dashboard
+            </Link>
           </Button>
 
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="space-y-2">
-              <h1 className="font-heading break-all text-3xl font-semibold leading-tight tracking-tight md:text-4xl">
-                {tracker.url}
-              </h1>
-              <p className="max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">
-                Inspect tracker metadata, edit settings, and review change
-                history.
-              </p>
-            </div>
+          <div className="rounded-2xl border border-border/70 bg-card p-5">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant={tracker.is_active ? "default" : "secondary"}>
+                    {tracker.is_active ? "Active" : "Inactive"}
+                  </Badge>
+                  {checkResult ? (
+                    <Badge variant={getCheckStatusTone(checkResult.status)}>
+                      {checkResult.status}
+                    </Badge>
+                  ) : null}
+                </div>
 
-            <Badge variant={tracker.is_active ? "default" : "secondary"}>
-              {tracker.is_active ? "Active" : "Inactive"}
-            </Badge>
+                <div className="space-y-2">
+                  <h1 className="font-heading break-all text-3xl font-semibold leading-tight tracking-tight md:text-4xl">
+                    {tracker.url}
+                  </h1>
+                  <p className="max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">
+                    Edit the selector, run checks, and review changes without
+                    wasting space on filler.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleRunCheck}
+                  disabled={isRunningCheck}
+                >
+                  <PlayIcon className="size-4" />
+                  {isRunningCheck ? "Running..." : "Run Check"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => setIsDeleteDialogOpen(true)}
+                  disabled={isDeleting}
+                >
+                  <Trash2Icon className="size-4" />
+                  Delete
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -301,64 +360,51 @@ export function TrackerDetailClient({
           </Alert>
         ) : null}
 
-        <Card className="border-border/70 pt-0">
-          <CardHeader className="border-b bg-muted/20 px-4 py-4">
-            <CardTitle>Tracker Metadata</CardTitle>
-            <CardDescription>
-              Current configuration and recent activity for this tracker.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-3 pt-5 text-sm md:grid-cols-2 xl:grid-cols-3">
-            <div className="space-y-2 rounded-lg bg-muted/35 p-4">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <Card size="sm" className="border-border/70 bg-muted/15">
+            <CardContent className="space-y-2 pt-4">
               <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
                 Selector
               </p>
               <p className="break-all font-mono text-xs leading-6 text-foreground">
                 {tracker.selector}
               </p>
-            </div>
-            <div className="space-y-2 rounded-lg bg-muted/35 p-4">
-              <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
-                Notifications
-              </p>
-              <p className="text-sm leading-6 text-foreground">
-                Sent to your account email
-              </p>
-            </div>
-            <div className="space-y-2 rounded-lg bg-muted/35 p-4">
-              <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
-                Created
-              </p>
-              <p className="text-sm leading-6 text-foreground">
-                {formatDateTime(tracker.created_at)}
-              </p>
-            </div>
-            <div className="space-y-2 rounded-lg bg-muted/35 p-4">
-              <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
-                Updated
-              </p>
-              <p className="text-sm leading-6 text-foreground">
-                {formatDateTime(tracker.updated_at ?? null)}
-              </p>
-            </div>
-            <div className="space-y-2 rounded-lg bg-muted/35 p-4">
+            </CardContent>
+          </Card>
+
+          <Card size="sm" className="border-border/70 bg-muted/15">
+            <CardContent className="space-y-2 pt-4">
               <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
                 Last checked
               </p>
               <p className="text-sm leading-6 text-foreground">
                 {formatDateTime(tracker.last_checked_at)}
               </p>
-            </div>
-            <div className="space-y-2 rounded-lg bg-muted/35 p-4">
+            </CardContent>
+          </Card>
+
+          <Card size="sm" className="border-border/70 bg-muted/15">
+            <CardContent className="space-y-2 pt-4">
               <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
                 Last changed
               </p>
               <p className="text-sm leading-6 text-foreground">
                 {formatDateTime(tracker.last_changed_at)}
               </p>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+
+          <Card size="sm" className="border-border/70 bg-muted/15">
+            <CardContent className="space-y-2 pt-4">
+              <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
+                Created
+              </p>
+              <p className="text-sm leading-6 text-foreground">
+                {formatDateTime(tracker.created_at)}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
 
         <TrackerEditForm
           tracker={tracker}
@@ -366,138 +412,86 @@ export function TrackerDetailClient({
           onSave={handleSave}
         />
 
-        <Card className="border-border/70 pt-0">
-          <CardHeader className="border-b bg-muted/20 px-4 py-4">
-            <CardTitle>Manual Check</CardTitle>
-            <CardDescription>
-              Run a check now and refresh this tracker with the latest result.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-5 pt-5">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleRunCheck}
-              disabled={isRunningCheck}
-            >
-              {isRunningCheck ? "Running Check..." : "Run Check"}
-            </Button>
-
-            {checkResult ? (
-              <div className="space-y-4">
-                <Alert
-                  variant={
-                    checkResult.status === "changed" &&
-                    checkResult.email_error == null
-                      ? "default"
-                      : checkResult.email_error
-                        ? "destructive"
-                        : "default"
-                  }
-                >
-                  <AlertTitle>Result: {checkResult.status}</AlertTitle>
-                  <AlertDescription className="space-y-1.5">
-                    <p>{checkResult.message}</p>
-                    {typeof checkResult.email_sent === "boolean" ? (
-                      <p>Email sent: {checkResult.email_sent ? "Yes" : "No"}</p>
-                    ) : null}
-                    {checkResult.email_error ? (
-                      <p>Email error: {checkResult.email_error}</p>
-                    ) : null}
-                  </AlertDescription>
-                </Alert>
-
-                {checkResult.old_content || checkResult.new_content ? (
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <p className="font-medium text-foreground">Old Content</p>
-                      <div className="rounded-xl border bg-muted/20 p-4 font-mono text-sm leading-7 text-muted-foreground whitespace-pre-wrap break-words">
-                        {checkResult.old_content || "Empty"}
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <p className="font-medium text-foreground">New Content</p>
-                      <div className="rounded-xl border bg-muted/20 p-4 font-mono text-sm leading-7 text-muted-foreground whitespace-pre-wrap break-words">
-                        {checkResult.new_content || "Empty"}
-                      </div>
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
-          </CardContent>
-        </Card>
+        {checkResult ? (
+          <Alert
+            variant={
+              checkResult.status === "changed" && checkResult.email_error == null
+                ? "default"
+                : checkResult.email_error
+                  ? "destructive"
+                  : "default"
+            }
+          >
+            <AlertTitle className="flex flex-wrap items-center gap-2 capitalize">
+              {checkResult.status}
+              {typeof checkResult.email_sent === "boolean" ? (
+                <Badge variant="outline">
+                  Email {checkResult.email_sent ? "sent" : "not sent"}
+                </Badge>
+              ) : null}
+            </AlertTitle>
+            <AlertDescription className="space-y-1.5">
+              <p>{checkResult.message}</p>
+              {checkResult.email_error ? (
+                <p>{checkResult.email_error}</p>
+              ) : null}
+            </AlertDescription>
+          </Alert>
+        ) : null}
 
         <Card className="border-border/70 pt-0">
           <CardHeader className="border-b bg-muted/20 px-4 py-4">
             <CardTitle>Change History</CardTitle>
             <CardDescription>
-              Previous content snapshots captured for this tracker.
+              Snapshots from detected content updates.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4 pt-5">
+          <CardContent className="space-y-3 pt-5">
             {changeLogs.length === 0 ? (
               <EmptyState
-                icon={<HistoryIcon className="size-5" />}
+                icon={<Clock3Icon className="size-5" />}
                 title="No change history yet"
-                description="Once this tracker detects a content update, the previous and new values will appear here."
+                description="When this tracker detects an update, the previous and new values will appear here."
               />
             ) : (
-              changeLogs.map((log) => (
-                <div
-                  key={log.id}
-                  className="space-y-4 rounded-xl border bg-muted/15 p-4 text-sm shadow-sm"
-                >
-                  <p className="text-sm font-medium tracking-tight text-foreground">
-                    {formatDateTime(log.changed_at)}
-                  </p>
-
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <p className="font-medium text-foreground">Old Content</p>
-                      <div className="rounded-xl border bg-background p-4 font-mono text-sm leading-7 text-muted-foreground whitespace-pre-wrap break-words">
-                        {log.old_content || "Empty"}
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <p className="font-medium text-foreground">New Content</p>
-                      <div className="rounded-xl border bg-background p-4 font-mono text-sm leading-7 text-muted-foreground whitespace-pre-wrap break-words">
-                        {log.new_content || "Empty"}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[180px]">Date</TableHead>
+                    <TableHead>Before</TableHead>
+                    <TableHead>After</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {changeLogs.map((log) => (
+                    <TableRow key={log.id}>
+                      <TableCell className="font-medium text-foreground">
+                        {formatDateTime(log.changed_at)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="max-h-32 overflow-y-auto rounded-md border bg-muted/10 px-3 py-2 font-mono text-xs leading-5 text-muted-foreground whitespace-pre-wrap break-words">
+                          {log.old_content || "Empty"}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="max-h-32 overflow-y-auto rounded-md border bg-muted/10 px-3 py-2 font-mono text-xs leading-5 text-muted-foreground whitespace-pre-wrap break-words">
+                          {log.new_content || "Empty"}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             )}
           </CardContent>
         </Card>
 
-        <Card className="border-destructive/30 pt-0">
-          <CardHeader className="border-b bg-destructive/5 px-4 py-4">
-            <CardAction>
-              <Badge variant="secondary">Danger Zone</Badge>
-            </CardAction>
-            <CardTitle>Delete Tracker</CardTitle>
-            <CardDescription>
-              Permanently remove this tracker and stop future checks.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-5">
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={() => setIsDeleteDialogOpen(true)}
-              disabled={isDeleting}
-            >
-              Delete Tracker
-            </Button>
-          </CardContent>
-        </Card>
       </section>
 
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete this tracker?</AlertDialogTitle>

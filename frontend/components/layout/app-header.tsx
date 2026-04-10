@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ActivityIcon, PlusIcon } from "lucide-react";
+import {
+  ActivityIcon,
+  KeyRoundIcon,
+  PlusIcon,
+  UserPlusIcon,
+} from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 import { LogoutButton } from "@/components/auth/logout-button";
@@ -66,11 +71,17 @@ export function AppHeader() {
             </div>
           ) : (
             <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-              <Button asChild variant="ghost" size="sm">
-                <Link href="/login">Login</Link>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/login">
+                  <KeyRoundIcon className="size-4" />
+                  Login
+                </Link>
               </Button>
               <Button asChild size="sm">
-                <Link href="/signup">Sign Up</Link>
+                <Link href="/signup">
+                  <UserPlusIcon className="size-4" />
+                  Sign Up
+                </Link>
               </Button>
             </div>
           )}

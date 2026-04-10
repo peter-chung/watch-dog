@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { startTransition, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { UserPlusIcon } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -110,6 +111,7 @@ export default function Page() {
             </div>
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <UserPlusIcon className="size-4" />
               {isSubmitting ? "Creating account..." : "Sign Up"}
             </Button>
 

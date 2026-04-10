@@ -1,4 +1,5 @@
 import logging
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -23,6 +24,13 @@ from app.services.checker import check_tracker
 
 router = APIRouter(prefix="/trackers", tags=["trackers"])
 logger = logging.getLogger(__name__)
+
+
+def parse_tracker_id_or_404(tracker_id: str) -> str:
+    try:
+        return str(UUID(tracker_id))
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Tracker not found")
 
 
 @router.post("")
@@ -51,6 +59,7 @@ def get_trackers(user_id: str = Depends(get_current_user_id)):
 
 @router.get("/{tracker_id}")
 def get_tracker_by_id(tracker_id: str, user_id: str = Depends(get_current_user_id)):
+    tracker_id = parse_tracker_id_or_404(tracker_id)
     data = get_tracker_by_id_record_for_user(tracker_id, user_id)
 
     if not data:
@@ -63,6 +72,7 @@ def get_tracker_by_id(tracker_id: str, user_id: str = Depends(get_current_user_i
 def get_tracker_change_logs(
     tracker_id: str, user_id: str = Depends(get_current_user_id)
 ):
+    tracker_id = parse_tracker_id_or_404(tracker_id)
     tracker = get_tracker_by_id_record_for_user(tracker_id, user_id)
 
     if not tracker:
@@ -77,6 +87,7 @@ def update_tracker(
     tracker_update: TrackerUpdate,
     user_id: str = Depends(get_current_user_id),
 ):
+    tracker_id = parse_tracker_id_or_404(tracker_id)
     update_data = tracker_update.model_dump(exclude_unset=True)
 
     if "url" in update_data:
@@ -95,6 +106,7 @@ def update_tracker(
 
 @router.delete("/{tracker_id}")
 def delete_tracker(tracker_id: str, user_id: str = Depends(get_current_user_id)):
+    tracker_id = parse_tracker_id_or_404(tracker_id)
     data = delete_tracker_record_for_user(tracker_id, user_id)
 
     if not data:
@@ -122,6 +134,7 @@ def test_tracker(tracker_test: TrackerTestRequest):
 @router.post("/{tracker_id}/check")
 def run_tracker_check(tracker_id: str, user_id: str = Depends(get_current_user_id)):
     try:
+        tracker_id = parse_tracker_id_or_404(tracker_id)
         tracker = get_tracker_by_id_record_for_user(tracker_id, user_id)
 
         if not tracker:

@@ -2,11 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { LogOutIcon } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 
-export function LogoutButton() {
+type LogoutButtonProps = {
+  compactOnMobile?: boolean;
+};
+
+export function LogoutButton({
+  compactOnMobile = false,
+}: LogoutButtonProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -26,8 +33,29 @@ export function LogoutButton() {
   }
 
   return (
-    <Button variant="outline" onClick={handleLogout} disabled={isSubmitting}>
-      {isSubmitting ? "Signing out..." : "Logout"}
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={handleLogout}
+      disabled={isSubmitting}
+      aria-label="Logout"
+    >
+      {compactOnMobile ? (
+        <span className="inline-flex items-center gap-1.5">
+          <LogOutIcon className="size-4" />
+          {isSubmitting ? "Signing out..." : "Logout"}
+        </span>
+      ) : isSubmitting ? (
+        <>
+          <LogOutIcon className="size-4" />
+          Signing out...
+        </>
+      ) : (
+        <>
+          <LogOutIcon className="size-4" />
+          Logout
+        </>
+      )}
     </Button>
   );
 }

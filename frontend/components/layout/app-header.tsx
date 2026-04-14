@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import {
   ActivityIcon,
   KeyRoundIcon,
@@ -9,36 +8,13 @@ import {
   UserPlusIcon,
 } from "lucide-react";
 
-import { createClient } from "@/lib/supabase/client";
+import { useSupabaseAuth } from "@/components/auth/supabase-auth-provider";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { Button } from "@/components/ui/button";
 
 export function AppHeader() {
-  const [userEmail, setUserEmail] = useState<string | null>(null);
-
-  useEffect(() => {
-    const supabase = createClient();
-
-    async function loadSession() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      setUserEmail(session?.user.email ?? null);
-    }
-
-    void loadSession();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUserEmail(session?.user.email ?? null);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
+  const { isLoading, user } = useSupabaseAuth();
+  const userEmail = user?.email ?? null;
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-xl">
@@ -58,7 +34,9 @@ export function AppHeader() {
             </Link>
           </div>
 
-          {userEmail ? (
+          {isLoading ? (
+            <div className="h-9 w-32 shrink-0 rounded-md bg-muted/50" />
+          ) : userEmail ? (
             <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
               <Button asChild size="sm">
                 <Link href="/trackers/new">

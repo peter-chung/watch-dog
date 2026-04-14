@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.database.supabase import close_supabase
 from app.routes.trackers import router as trackers_router
 from app.services.scheduler import start_scheduler, scheduler
 
@@ -12,6 +13,7 @@ async def lifespan(app: FastAPI):
     yield
     if scheduler.running:
         scheduler.shutdown()
+    close_supabase()
 
 
 app = FastAPI(lifespan=lifespan)

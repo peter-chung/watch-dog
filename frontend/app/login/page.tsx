@@ -5,7 +5,7 @@ import { startTransition, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { KeyRoundIcon } from "lucide-react";
 
-import { createClient } from "@/lib/supabase/client";
+import { useSupabaseAuth } from "@/components/auth/supabase-auth-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 
 export default function Page() {
   const router = useRouter();
+  const { isLoading, session, supabase } = useSupabaseAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,27 +28,16 @@ export default function Page() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const supabase = createClient();
-
-    async function redirectIfAuthenticated() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (session) {
-        router.replace("/");
-      }
+    if (!isLoading && session) {
+      router.replace("/");
     }
-
-    void redirectIfAuthenticated();
-  }, [router]);
+  }, [isLoading, router, session]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setIsSubmitting(true);
 
-    const supabase = createClient();
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,

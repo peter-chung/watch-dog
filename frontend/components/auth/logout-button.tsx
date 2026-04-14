@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LogOutIcon } from "lucide-react";
 
-import { createClient } from "@/lib/supabase/client";
+import { useSupabaseAuth } from "@/components/auth/supabase-auth-provider";
 import { Button } from "@/components/ui/button";
 
 type LogoutButtonProps = {
@@ -15,12 +15,12 @@ export function LogoutButton({
   compactOnMobile = false,
 }: LogoutButtonProps) {
   const router = useRouter();
+  const { supabase } = useSupabaseAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleLogout() {
     setIsSubmitting(true);
 
-    const supabase = createClient();
     const { error } = await supabase.auth.signOut();
 
     setIsSubmitting(false);

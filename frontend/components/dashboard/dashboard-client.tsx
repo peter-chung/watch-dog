@@ -13,8 +13,8 @@ import {
   SparklesIcon,
 } from "lucide-react";
 
+import { useSupabaseAuth } from "@/components/auth/supabase-auth-provider";
 import { getTrackers, type Tracker } from "@/lib/api";
-import { createClient } from "@/lib/supabase/client";
 import { TrackerList } from "@/components/tracker-list";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -61,6 +61,7 @@ function hasStaleCheck(value: string | null) {
 
 export function DashboardClient() {
   const router = useRouter();
+  const { supabase } = useSupabaseAuth();
   const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -87,7 +88,6 @@ export function DashboardClient() {
           err instanceof Error ? err.message : "Failed to load trackers.";
 
         if (message === "Unauthorized." || message === "Invalid token.") {
-          const supabase = createClient();
           await supabase.auth.signOut();
           router.replace("/login");
           return;
@@ -106,7 +106,7 @@ export function DashboardClient() {
     return () => {
       isMounted = false;
     };
-  }, [router]);
+  }, [router, supabase]);
 
   const activeTrackers = trackers.filter((tracker) => tracker.is_active).length;
   const inactiveTrackers = trackers.length - activeTrackers;

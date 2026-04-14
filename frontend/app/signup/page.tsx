@@ -5,7 +5,7 @@ import { startTransition, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserPlusIcon } from "lucide-react";
 
-import { createClient } from "@/lib/supabase/client";
+import { useSupabaseAuth } from "@/components/auth/supabase-auth-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 
 export default function Page() {
   const router = useRouter();
+  const { isLoading, session, supabase } = useSupabaseAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,19 +29,10 @@ export default function Page() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    async function redirectIfAuthenticated() {
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (session) {
-        router.replace("/");
-      }
+    if (!isLoading && session) {
+      router.replace("/");
     }
-
-    void redirectIfAuthenticated();
-  }, [router]);
+  }, [isLoading, router, session]);
 
   async function handleSignup(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -48,7 +40,6 @@ export default function Page() {
     setMessage("");
     setIsSubmitting(true);
 
-    const supabase = createClient();
     const { data, error } = await supabase.auth.signUp({
       email,
       password,

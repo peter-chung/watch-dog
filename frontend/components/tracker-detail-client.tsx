@@ -23,7 +23,7 @@ import {
   type Tracker,
   type UpdateTrackerPayload,
 } from "@/lib/api";
-import { createClient } from "@/lib/supabase/client";
+import { useSupabaseAuth } from "@/components/auth/supabase-auth-provider";
 import { NotFoundState } from "@/components/not-found-state";
 import { TrackerEditForm } from "@/components/tracker-edit-form";
 import {
@@ -94,6 +94,7 @@ export function TrackerDetailClient({
   trackerId,
 }: TrackerDetailClientProps) {
   const router = useRouter();
+  const { supabase } = useSupabaseAuth();
   const [tracker, setTracker] = useState<Tracker | null>(null);
   const [changeLogs, setChangeLogs] = useState<ChangeLog[]>([]);
   const [checkResult, setCheckResult] = useState<TrackerCheckResult | null>(
@@ -110,7 +111,6 @@ export function TrackerDetailClient({
   const handleAuthError = useCallback(
     async (message: string) => {
       if (message === "Unauthorized." || message === "Invalid token.") {
-        const supabase = createClient();
         await supabase.auth.signOut();
         router.replace("/login");
         return true;
@@ -118,7 +118,7 @@ export function TrackerDetailClient({
 
       return false;
     },
-    [router]
+    [router, supabase]
   );
 
   async function refreshTrackerDetail() {

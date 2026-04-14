@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import { createClient } from "@/lib/supabase/client";
+import { useSupabaseAuth } from "@/components/auth/supabase-auth-provider";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type RequireAuthProps = {
@@ -12,65 +12,13 @@ type RequireAuthProps = {
 
 export function RequireAuth({ children }: RequireAuthProps) {
   const router = useRouter();
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRedirecting, setIsRedirecting] = useState(false);
+  const { isLoading, session } = useSupabaseAuth();
 
   useEffect(() => {
-    const supabase = createClient();
-
-    async function loadSession() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session) {
-        const { data } = await supabase.auth.refreshSession();
-
-        if (data.session) {
-          setIsAuthorized(true);
-          setIsLoading(false);
-          setIsRedirecting(false);
-          return;
-        }
-      }
-
-      if (!session) {
-        setIsLoading(false);
-        setIsRedirecting(true);
-        router.replace("/login");
-        return;
-      }
-
-      setIsAuthorized(true);
-      setIsLoading(false);
-      setIsRedirecting(false);
+    if (!isLoading && !session) {
+      router.replace("/login");
     }
-
-    void loadSession();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_OUT") {
-        setIsAuthorized(false);
-        setIsLoading(false);
-        setIsRedirecting(true);
-        router.replace("/login");
-        return;
-      }
-
-      if (session) {
-        setIsAuthorized(true);
-        setIsLoading(false);
-        setIsRedirecting(false);
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [router]);
+  }, [isLoading, router, session]);
 
   if (isLoading) {
     return (
@@ -82,8 +30,8 @@ export function RequireAuth({ children }: RequireAuthProps) {
     );
   }
 
-  if (!isAuthorized) {
-    return isRedirecting ? null : null;
+  if (!session) {
+    return null;
   }
 
   return <>{children}</>;

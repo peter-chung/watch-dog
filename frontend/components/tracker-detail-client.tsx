@@ -295,7 +295,7 @@ export function TrackerDetailClient({
   return (
     <>
       <section className="space-y-8">
-        <div className="space-y-5">
+        <div className="space-y-4">
           <Button asChild variant="ghost" size="sm">
             <Link href="/">
               <ArrowLeftIcon className="size-4" />
@@ -303,51 +303,99 @@ export function TrackerDetailClient({
             </Link>
           </Button>
 
-          <div className="rounded-2xl border border-border/70 bg-card p-5">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="space-y-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant={tracker.is_active ? "default" : "secondary"}>
-                    {tracker.is_active ? "Active" : "Inactive"}
-                  </Badge>
-                  {checkResult ? (
-                    <Badge variant={getCheckStatusTone(checkResult.status)}>
-                      {checkResult.status}
+          <div className="rounded-2xl border border-border/70 bg-card px-5 pt-5 pb-4">
+            <div className="space-y-5">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant={tracker.is_active ? "default" : "secondary"}>
+                      {tracker.is_active ? "Active" : "Inactive"}
                     </Badge>
-                  ) : null}
+                    {checkResult ? (
+                      <Badge variant={getCheckStatusTone(checkResult.status)}>
+                        {checkResult.status}
+                      </Badge>
+                    ) : null}
+                  </div>
+
+                  <div className="space-y-2">
+                    <h1 className="font-heading break-all text-3xl font-semibold leading-tight tracking-tight md:text-4xl">
+                      {tracker.url}
+                    </h1>
+                    <p className="max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">
+                      Edit the selector, run checks, and review changes without
+                      wasting space on filler.
+                    </p>
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <h1 className="font-heading break-all text-3xl font-semibold leading-tight tracking-tight md:text-4xl">
-                    {tracker.url}
-                  </h1>
-                  <p className="max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">
-                    Edit the selector, run checks, and review changes without
-                    wasting space on filler.
-                  </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleRunCheck}
+                    disabled={isRunningCheck}
+                  >
+                    <PlayIcon className="size-4" />
+                    {isRunningCheck ? "Running..." : "Run Check"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    className="border border-destructive/40"
+                    onClick={() => setIsDeleteDialogOpen(true)}
+                    disabled={isDeleting}
+                  >
+                    <Trash2Icon className="size-4" />
+                    Delete
+                  </Button>
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleRunCheck}
-                  disabled={isRunningCheck}
-                >
-                  <PlayIcon className="size-4" />
-                  {isRunningCheck ? "Running..." : "Run Check"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  className="border border-destructive/40"
-                  onClick={() => setIsDeleteDialogOpen(true)}
-                  disabled={isDeleting}
-                >
-                  <Trash2Icon className="size-4" />
-                  Delete
-                </Button>
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                <Card size="sm" className="border-border/70 bg-background/90">
+                  <CardHeader className="gap-2.5">
+                    <CardDescription className="text-xs font-medium uppercase tracking-[0.16em]">
+                      Selector
+                    </CardDescription>
+                    <p className="break-all font-mono text-xs leading-6 text-foreground">
+                      {tracker.selector}
+                    </p>
+                  </CardHeader>
+                </Card>
+
+                <Card size="sm" className="border-border/70 bg-background/90">
+                  <CardHeader className="gap-2.5">
+                    <CardDescription className="text-xs font-medium uppercase tracking-[0.16em]">
+                      Last checked
+                    </CardDescription>
+                    <p className="text-sm leading-6 text-foreground">
+                      {formatDateTime(tracker.last_checked_at)}
+                    </p>
+                  </CardHeader>
+                </Card>
+
+                <Card size="sm" className="border-border/70 bg-background/90">
+                  <CardHeader className="gap-2.5">
+                    <CardDescription className="text-xs font-medium uppercase tracking-[0.16em]">
+                      Last changed
+                    </CardDescription>
+                    <p className="text-sm leading-6 text-foreground">
+                      {formatDateTime(tracker.last_changed_at)}
+                    </p>
+                  </CardHeader>
+                </Card>
+
+                <Card size="sm" className="border-border/70 bg-background/90">
+                  <CardHeader className="gap-2.5">
+                    <CardDescription className="text-xs font-medium uppercase tracking-[0.16em]">
+                      Created
+                    </CardDescription>
+                    <p className="text-sm leading-6 text-foreground">
+                      {formatDateTime(tracker.created_at)}
+                    </p>
+                  </CardHeader>
+                </Card>
               </div>
             </div>
           </div>
@@ -359,52 +407,6 @@ export function TrackerDetailClient({
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         ) : null}
-
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <Card size="sm" className="border-border/70 bg-muted/15">
-            <CardContent className="space-y-2 pt-4">
-              <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
-                Selector
-              </p>
-              <p className="break-all font-mono text-xs leading-6 text-foreground">
-                {tracker.selector}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card size="sm" className="border-border/70 bg-muted/15">
-            <CardContent className="space-y-2 pt-4">
-              <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
-                Last checked
-              </p>
-              <p className="text-sm leading-6 text-foreground">
-                {formatDateTime(tracker.last_checked_at)}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card size="sm" className="border-border/70 bg-muted/15">
-            <CardContent className="space-y-2 pt-4">
-              <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
-                Last changed
-              </p>
-              <p className="text-sm leading-6 text-foreground">
-                {formatDateTime(tracker.last_changed_at)}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card size="sm" className="border-border/70 bg-muted/15">
-            <CardContent className="space-y-2 pt-4">
-              <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
-                Created
-              </p>
-              <p className="text-sm leading-6 text-foreground">
-                {formatDateTime(tracker.created_at)}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
 
         <TrackerEditForm
           tracker={tracker}
@@ -440,29 +442,23 @@ export function TrackerDetailClient({
         ) : null}
 
         <Card className="border-border/70 pt-0">
-          <CardHeader className="border-b bg-muted/20 px-4 py-4">
-            <CardTitle>Change History</CardTitle>
+          <CardHeader className="px-4 py-4">
+            <CardTitle className="text-xl">Change History</CardTitle>
             <CardDescription>
               Snapshots from detected content updates.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3 pt-5">
+          <CardContent className="space-y-3 pt-0 pb-0">
             {changeLogs.length === 0 ? (
-              <div className="rounded-lg border border-dashed bg-muted/10 px-4 py-6">
-                <div className="flex items-start gap-3">
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-background text-muted-foreground ring-1 ring-border/60">
-                    <Clock3Icon className="size-4" />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-foreground">
-                      No change history yet
-                    </p>
-                    <p className="text-sm leading-6 text-muted-foreground">
-                      When this tracker detects an update, the previous and new
-                      values will appear here.
-                    </p>
-                  </div>
-                </div>
+              <div className="px-4 py-3 text-center">
+                <p className="inline-flex items-center gap-2 text-sm font-medium leading-5 text-foreground">
+                  <Clock3Icon className="size-4 text-muted-foreground" />
+                  No change history yet
+                </p>
+                <p className="mt-0.5 text-sm leading-5 text-muted-foreground">
+                  When this tracker detects an update, the previous and new
+                  values will appear here.
+                </p>
               </div>
             ) : (
               <Table>

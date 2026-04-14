@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SearchCheckIcon } from "lucide-react";
+import { SearchCheckIcon, SparklesIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -121,14 +121,14 @@ export function TrackerEditForm({
 
   return (
     <Card className="border-border/70 pt-0">
-      <CardHeader className="border-b bg-muted/20 px-4 py-4">
-        <CardTitle>Edit Tracker</CardTitle>
+      <CardHeader className="px-4 py-4">
+        <CardTitle className="text-xl">Edit Tracker</CardTitle>
         <CardDescription className="max-w-2xl">
           Update the page target, selector, or monitoring status.
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="pt-6">
+      <CardContent className="pt-0 pb-0">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="edit-url">URL</Label>
@@ -183,10 +183,11 @@ export function TrackerEditForm({
           </div>
 
           {preview ? (
-            <div className="space-y-2 rounded-xl border bg-muted/25 p-4">
-              <p className="text-sm font-medium tracking-tight text-foreground">
-                Preview
-              </p>
+            <div className="rounded-lg bg-background p-3 ring-1 ring-border/70">
+              <div className="mb-2 flex items-center gap-2 text-sm font-medium tracking-tight text-foreground">
+                <SparklesIcon className="size-4 text-muted-foreground" />
+                Preview result
+              </div>
               <p className="break-words text-sm leading-7 text-muted-foreground">
                 {preview}
               </p>

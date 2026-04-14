@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { PlusIcon, SearchCheckIcon } from "lucide-react";
+import { PlusIcon, SearchCheckIcon, SparklesIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { createTracker, testTracker } from "@/lib/api";
@@ -104,14 +104,14 @@ export function TrackerForm() {
 
   return (
     <Card className="w-full border-border/70 pt-0">
-      <CardHeader className="border-b bg-muted/20 px-4 py-4">
+      <CardHeader className="px-4 py-4">
         <CardTitle className="text-2xl">Create a new tracker</CardTitle>
         <CardDescription>
           Add a webpage URL and CSS selector to monitor for changes.
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="space-y-6 pt-6">
+      <CardContent className="space-y-6 pt-0 pb-0">
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="url">URL</Label>
@@ -165,10 +165,11 @@ export function TrackerForm() {
           </div>
 
           {preview ? (
-            <div className="space-y-2 rounded-xl border bg-muted/25 p-4">
-              <p className="text-sm font-medium tracking-tight text-foreground">
-                Preview
-              </p>
+            <div className="rounded-lg bg-background p-3 ring-1 ring-border/70">
+              <div className="mb-2 flex items-center gap-2 text-sm font-medium tracking-tight text-foreground">
+                <SparklesIcon className="size-4 text-muted-foreground" />
+                Preview result
+              </div>
               <p className="break-words text-sm leading-7 text-muted-foreground">
                 {preview}
               </p>

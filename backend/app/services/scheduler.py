@@ -1,14 +1,17 @@
-from apscheduler.schedulers.background import BackgroundScheduler
-
 from app.services.checker import check_tracker
 from app.services.trackers import get_active_trackers
 
 
-scheduler = BackgroundScheduler()
-
-
-def run_all_tracker_checks():
+def run_all_tracker_checks() -> dict[str, int]:
     trackers = get_active_trackers()
+    summary = {
+        "total": len(trackers),
+        "succeeded": 0,
+        "failed": 0,
+        "baseline_saved": 0,
+        "no_change": 0,
+        "changed": 0,
+    }
 
     print(f"Running scheduled checks for {len(trackers)} active tracker(s).")
 
@@ -21,25 +24,31 @@ def run_all_tracker_checks():
 
         try:
             result = check_tracker(tracker_id)
+            status = result.get("status", "unknown")
+            summary["succeeded"] += 1
+
+            if status in summary:
+                summary[status] += 1
+
             print(
-                f"[{tracker_id}] status={result.get('status')} message={result.get('message')}"
+                f"[{tracker_id}] status={status} message={result.get('message')}"
             )
         except Exception as exc:
+            summary["failed"] += 1
             print(f"[{tracker_id}] scheduled check failed: {str(exc)}")
 
-
-def start_scheduler():
-    if scheduler.running:
-        return
-
-    scheduler.add_job(
-        run_all_tracker_checks,
-        trigger="interval",
-        hours=1,
-        # seconds=30,  # For testing, run every 30 seconds. Change to hours=1 for production.
-        id="tracker_check_job",
-        replace_existing=True,
+    print(
+        "Scheduled check summary: "
+        f"total={summary['total']} "
+        f"succeeded={summary['succeeded']} "
+        f"failed={summary['failed']} "
+        f"baseline_saved={summary['baseline_saved']} "
+        f"no_change={summary['no_change']} "
+        f"changed={summary['changed']}"
     )
 
-    scheduler.start()
-    print("Scheduler started. Running tracker checks every hour.")
+    return summary
+
+
+def exit_code_from_summary(summary: dict[str, int]) -> int:
+    return 1 if summary["failed"] else 0

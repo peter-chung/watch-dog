@@ -65,7 +65,7 @@ Deploy the `backend/` directory as its own Vercel project.
 
 - Root Directory: `backend`
 - No custom build command required
-- Python entrypoint: [backend/api/index.py](/c:/Users/pchun/Workspace/watch-dog/backend/api/index.py)
+- Python entrypoint: [backend/index.py](/c:/Users/pchun/Workspace/watch-dog/backend/index.py)
 
 Required Vercel environment variables:
 
@@ -76,6 +76,8 @@ Required Vercel environment variables:
 - `CORS_ORIGINS`
 - `CRON_SECRET`
 - optional `CORS_ORIGIN_REGEX`
+
+Vercel's FastAPI deployment expects the app entrypoint at the project root, so this backend uses `index.py` directly and does not need a `vercel.json` file for routing.
 
 The Vercel backend includes an internal trigger endpoint:
 

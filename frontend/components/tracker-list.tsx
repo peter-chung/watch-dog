@@ -97,7 +97,7 @@ function hasRecentChange(value: string | null) {
 
 function hasStaleCheck(value: string | null) {
   if (!value) {
-    return true;
+    return false;
   }
 
   const timestamp = new Date(value).getTime();
@@ -109,25 +109,15 @@ function hasStaleCheck(value: string | null) {
   return Date.now() - timestamp > DAY_IN_MS;
 }
 
-function getDisplayUrl(value: string) {
+function getDisplayHost(value: string) {
   try {
     const url = new URL(value);
-    const path = `${url.pathname}${url.search}` || "/";
-
-    return {
-      host: url.host,
-      path,
-    };
+    return url.hostname || url.host || value;
   } catch {
-    return {
-      host: value,
-      path: "",
-    };
+    const trimmed = value.trim().replace(/^[a-z]+:\/\//i, "");
+    const [host] = trimmed.split(/[/?#]/);
+    return host || value;
   }
-}
-
-function isTrivialPath(path: string) {
-  return path === "" || path === "/";
 }
 
 export function TrackerList({ trackers }: TrackerListProps) {
@@ -172,10 +162,9 @@ export function TrackerList({ trackers }: TrackerListProps) {
       <CardContent className="px-0 pb-0">
         <div className="divide-y md:hidden">
           {trackers.map((tracker) => {
-            const url = getDisplayUrl(tracker.url);
+            const host = getDisplayHost(tracker.url);
             const isStale = hasStaleCheck(tracker.last_checked_at);
             const isRecent = hasRecentChange(tracker.last_changed_at);
-            const showPathInline = isTrivialPath(url.path);
 
             return (
               <button
@@ -186,19 +175,7 @@ export function TrackerList({ trackers }: TrackerListProps) {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 space-y-1">
-                    <div className="truncate font-medium">
-                      {url.host}
-                      {showPathInline ? (
-                        <span className="ml-1 text-muted-foreground">
-                          {url.path || ""}
-                        </span>
-                      ) : null}
-                    </div>
-                    {!showPathInline ? (
-                      <div className="truncate text-xs text-muted-foreground">
-                        {url.path || tracker.url}
-                      </div>
-                    ) : null}
+                    <div className="truncate font-medium">{host}</div>
                   </div>
                   <div className="flex shrink-0 items-start gap-2">
                     <div className="flex flex-wrap justify-end gap-1.5">
@@ -265,10 +242,9 @@ export function TrackerList({ trackers }: TrackerListProps) {
           </TableHeader>
           <TableBody>
             {trackers.map((tracker) => {
-              const url = getDisplayUrl(tracker.url);
+              const host = getDisplayHost(tracker.url);
               const isStale = hasStaleCheck(tracker.last_checked_at);
               const isRecent = hasRecentChange(tracker.last_changed_at);
-              const showPathInline = isTrivialPath(url.path);
 
               return (
                 <TableRow
@@ -285,20 +261,10 @@ export function TrackerList({ trackers }: TrackerListProps) {
                   }}
                 >
                     <TableCell className="max-w-0 pl-4">
-                      <div className="max-w-[20rem] space-y-0.5">
+                      <div className="max-w-[20rem]">
                         <div className="truncate font-medium transition-colors group-hover:text-primary group-focus-visible:text-primary">
-                          {url.host}
-                          {showPathInline ? (
-                            <span className="ml-1 text-muted-foreground">
-                              {url.path || ""}
-                            </span>
-                          ) : null}
+                          {host}
                         </div>
-                        {!showPathInline ? (
-                          <div className="truncate text-xs text-muted-foreground">
-                            {url.path || tracker.url}
-                          </div>
-                        ) : null}
                       </div>
                     </TableCell>
 
@@ -324,11 +290,7 @@ export function TrackerList({ trackers }: TrackerListProps) {
                             <Clock3Icon className="size-3.5" />
                             Stale
                           </Badge>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">
-                            Healthy
-                          </span>
-                        )}
+                        ) : null}
                       </div>
                     </TableCell>
 

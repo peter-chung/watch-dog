@@ -65,7 +65,7 @@ Deploy the `backend/` directory as its own Vercel project.
 
 - Root Directory: `backend`
 - No custom build command required
-- Python entrypoint: [backend/index.py](/c:/Users/pchun/Workspace/watch-dog/backend/index.py)
+- Python entrypoint: [backend/api/index.py](/c:/Users/pchun/Workspace/watch-dog/backend/api/index.py)
 
 Required Vercel environment variables:
 

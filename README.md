@@ -77,6 +77,8 @@ Required Vercel environment variables:
 - `CRON_SECRET`
 - optional `CORS_ORIGIN_REGEX`
 
+Vercel's FastAPI deployment expects the app entrypoint at the project root, so this backend uses `index.py` directly and does not need a `vercel.json` file for routing.
+
 The Vercel backend includes an internal trigger endpoint:
 
 - `GET` or `POST` `/internal/run-checks`

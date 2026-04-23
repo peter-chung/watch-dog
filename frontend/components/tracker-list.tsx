@@ -34,7 +34,7 @@ type TrackerListProps = {
 };
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
-const WEEK_IN_MS = 7 * DAY_IN_MS;
+const RECENT_CHANGE_WINDOW_MS = 2 * DAY_IN_MS;
 
 function formatDateTime(value: string | null) {
   if (!value) {
@@ -92,7 +92,7 @@ function hasRecentChange(value: string | null) {
     return false;
   }
 
-  return Date.now() - timestamp <= WEEK_IN_MS;
+  return Date.now() - timestamp <= RECENT_CHANGE_WINDOW_MS;
 }
 
 function hasStaleCheck(value: string | null) {
@@ -112,11 +112,11 @@ function hasStaleCheck(value: string | null) {
 function getDisplayHost(value: string) {
   try {
     const url = new URL(value);
-    return url.hostname || url.host || value;
+    return (url.hostname || url.host || value).replace(/^www\./i, "");
   } catch {
     const trimmed = value.trim().replace(/^[a-z]+:\/\//i, "");
     const [host] = trimmed.split(/[/?#]/);
-    return host || value;
+    return (host || value).replace(/^www\./i, "");
   }
 }
 

@@ -96,6 +96,17 @@ function formatCheckStatusLabel(status: string | undefined) {
     .replace(/\b\w/g, (character) => character.toUpperCase());
 }
 
+function getDisplayHost(value: string) {
+  try {
+    const url = new URL(value);
+    return (url.hostname || url.host || value).replace(/^www\./i, "");
+  } catch {
+    const trimmed = value.trim().replace(/^[a-z]+:\/\//i, "");
+    const [host] = trimmed.split(/[/?#]/);
+    return (host || value).replace(/^www\./i, "");
+  }
+}
+
 function showCheckResultToast(result: TrackerCheckResult) {
   if (result.status === "changed") {
     if (result.email_error) {
@@ -349,6 +360,8 @@ export function TrackerDetailClient({
     return null;
   }
 
+  const displayHost = getDisplayHost(tracker.url);
+
   return (
     <>
       <section className="space-y-8">
@@ -376,12 +389,11 @@ export function TrackerDetailClient({
                   </div>
 
                   <div className="space-y-2">
-                    <h1 className="font-heading break-all text-3xl font-semibold leading-tight tracking-tight md:text-4xl">
-                      {tracker.url}
+                    <h1 className="font-heading truncate text-3xl font-semibold leading-tight tracking-tight md:text-4xl">
+                      {displayHost}
                     </h1>
-                    <p className="max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">
-                      Edit the selector, run checks, and review changes without
-                      wasting space on filler.
+                    <p className="max-w-3xl break-all text-sm leading-6 text-muted-foreground md:text-base">
+                      {tracker.url}
                     </p>
                   </div>
                 </div>

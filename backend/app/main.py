@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database.supabase import close_supabase
+from app.routes.internal import router as internal_router
 from app.routes.trackers import router as trackers_router
 
 
@@ -53,6 +54,7 @@ app.add_middleware(
 )
 
 
+app.include_router(internal_router)
 app.include_router(trackers_router)
 
 

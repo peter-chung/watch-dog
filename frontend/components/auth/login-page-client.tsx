@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { startTransition, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { UserPlusIcon } from "lucide-react";
+import { KeyRoundIcon } from "lucide-react";
 
 import { useSupabaseAuth } from "@/components/auth/supabase-auth-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -18,14 +18,26 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export default function Page() {
+type LoginPageClientProps = {
+  initialEmail: string;
+  showSignupSuccess: boolean;
+};
+
+export function LoginPageClient({
+  initialEmail,
+  showSignupSuccess,
+}: LoginPageClientProps) {
   const router = useRouter();
   const { isLoading, session, supabase } = useSupabaseAuth();
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    setEmail(initialEmail);
+  }, [initialEmail]);
 
   useEffect(() => {
     if (!isLoading && session) {
@@ -33,39 +45,25 @@ export default function Page() {
     }
   }, [isLoading, router, session]);
 
-  async function handleSignup(event: React.FormEvent<HTMLFormElement>) {
+  async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const normalizedEmail = email.trim();
-
     setError("");
     setIsSubmitting(true);
 
-    const { data, error } = await supabase.auth.signUp({
-      email: normalizedEmail,
+    const { error: loginError } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
       password,
     });
 
-    if (error) {
-      setError(error.message);
+    if (loginError) {
+      setError(loginError.message);
       setIsSubmitting(false);
       return;
     }
 
-    if (data.session) {
-      startTransition(() => {
-        router.replace("/");
-        router.refresh();
-      });
-      return;
-    }
-
-    const params = new URLSearchParams({
-      signup: "success",
-      email: normalizedEmail,
-    });
-
     startTransition(() => {
-      router.replace(`/login?${params.toString()}`);
+      router.replace("/");
+      router.refresh();
     });
   }
 
@@ -73,14 +71,29 @@ export default function Page() {
     <section className="mx-auto flex min-h-[calc(100vh-12rem)] w-full max-w-md items-center">
       <Card className="w-full">
         <CardHeader>
-          <CardTitle className="text-2xl">Sign Up</CardTitle>
+          <CardTitle className="text-2xl">Login</CardTitle>
           <CardDescription>
-            Create an account to start managing trackers.
+            Sign in to manage your trackers.
           </CardDescription>
+          {showSignupSuccess ? (
+            <p className="text-sm leading-6 text-muted-foreground">
+              {initialEmail ? (
+                <>
+                  Account created for{" "}
+                  <span className="font-medium text-foreground">
+                    {initialEmail}
+                  </span>
+                  . Confirm your email, then sign in.
+                </>
+              ) : (
+                "Account created. Confirm your email, then sign in."
+              )}
+            </p>
+          ) : null}
         </CardHeader>
 
         <CardContent className="space-y-6">
-          <form onSubmit={handleSignup} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -89,7 +102,7 @@ export default function Page() {
                 autoComplete="email"
                 placeholder="you@example.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(event) => setEmail(event.target.value)}
                 required
               />
             </div>
@@ -99,31 +112,34 @@ export default function Page() {
               <Input
                 id="password"
                 type="password"
-                autoComplete="new-password"
-                placeholder="Create a password"
+                autoComplete="current-password"
+                placeholder="Enter your password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(event) => setPassword(event.target.value)}
                 required
               />
             </div>
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              <UserPlusIcon className="size-4" />
-              {isSubmitting ? "Creating account..." : "Sign Up"}
+              <KeyRoundIcon className="size-4" />
+              {isSubmitting ? "Signing in..." : "Login"}
             </Button>
 
             {error ? (
               <Alert variant="destructive">
-                <AlertTitle>Sign up failed</AlertTitle>
+                <AlertTitle>Login failed</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             ) : null}
           </form>
 
           <p className="text-sm text-muted-foreground">
-            Already have an account?{" "}
-            <Link href="/login" className="font-medium text-foreground underline">
-              Login
+            Need an account?{" "}
+            <Link
+              href="/signup"
+              className="font-medium text-foreground underline"
+            >
+              Sign up
             </Link>
           </p>
         </CardContent>

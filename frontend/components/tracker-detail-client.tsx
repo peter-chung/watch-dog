@@ -86,6 +86,70 @@ function getCheckStatusTone(status: string | undefined) {
   return "secondary" as const;
 }
 
+function formatCheckStatusLabel(status: string | undefined) {
+  if (!status) {
+    return "Unknown";
+  }
+
+  return status
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (character) => character.toUpperCase());
+}
+
+function showCheckResultToast(result: TrackerCheckResult) {
+  if (result.status === "changed") {
+    if (result.email_error) {
+      toast.error("Change detected, email failed", {
+        description: `The updated content was saved to change history, but the notification email could not be sent. ${result.email_error}`,
+      });
+      return;
+    }
+
+    toast.success("Change detected", {
+      description: "The updated content was saved to change history.",
+    });
+    return;
+  }
+
+  if (result.status === "baseline_saved") {
+    toast.success("Baseline saved", {
+      description:
+        "This first successful check stored the current content for future comparisons.",
+    });
+    return;
+  }
+
+  if (result.status === "no_change") {
+    toast("No change detected", {
+      description: "The selected content matches the last saved snapshot.",
+    });
+    return;
+  }
+
+  toast(formatCheckStatusLabel(result.status), {
+    description: result.message,
+  });
+}
+
+function showRunCheckErrorToast(message: string) {
+  if (message === "Tracker is inactive.") {
+    toast.error("Tracker is inactive", {
+      description: "Turn monitoring back on before running a manual check.",
+    });
+    return;
+  }
+
+  toast.error("Manual check failed", {
+    description: message,
+  });
+}
+
+function showDeleteErrorToast(message: string) {
+  toast.error("Could not delete tracker", {
+    description: message,
+  });
+}
+
 type TrackerDetailClientProps = {
   trackerId: string;
 };
@@ -196,7 +260,6 @@ export function TrackerDetailClient({
     try {
       const updatedTracker = await updateTracker(trackerId, payload);
       setTracker(updatedTracker);
-      setError(null);
       router.refresh();
     } finally {
       setIsSaving(false);
@@ -205,7 +268,6 @@ export function TrackerDetailClient({
 
   async function handleRunCheck() {
     setIsRunningCheck(true);
-    setError(null);
     setCheckResult(null);
 
     try {
@@ -213,6 +275,7 @@ export function TrackerDetailClient({
       setCheckResult(result);
       await refreshTrackerDetail();
       router.refresh();
+      showCheckResultToast(result);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to run tracker check.";
@@ -221,10 +284,7 @@ export function TrackerDetailClient({
         return;
       }
 
-      toast.error("Manual check failed", {
-        description: message,
-      });
-      setError(message);
+      showRunCheckErrorToast(message);
     } finally {
       setIsRunningCheck(false);
     }
@@ -244,10 +304,7 @@ export function TrackerDetailClient({
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to delete tracker.";
-      toast.error("Could not delete tracker", {
-        description: message,
-      });
-      setError(message);
+      showDeleteErrorToast(message);
       setIsDeleteDialogOpen(false);
     } finally {
       setIsDeleting(false);
@@ -313,7 +370,7 @@ export function TrackerDetailClient({
                     </Badge>
                     {checkResult ? (
                       <Badge variant={getCheckStatusTone(checkResult.status)}>
-                        {checkResult.status}
+                        {formatCheckStatusLabel(checkResult.status)}
                       </Badge>
                     ) : null}
                   </div>
@@ -401,45 +458,11 @@ export function TrackerDetailClient({
           </div>
         </div>
 
-        {error ? (
-          <Alert variant="destructive">
-            <AlertTitle>Action failed</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        ) : null}
-
         <TrackerEditForm
           tracker={tracker}
           isSaving={isSaving}
           onSave={handleSave}
         />
-
-        {checkResult ? (
-          <Alert
-            variant={
-              checkResult.status === "changed" && checkResult.email_error == null
-                ? "default"
-                : checkResult.email_error
-                  ? "destructive"
-                  : "default"
-            }
-          >
-            <AlertTitle className="flex flex-wrap items-center gap-2 capitalize">
-              {checkResult.status}
-              {typeof checkResult.email_sent === "boolean" ? (
-                <Badge variant="outline">
-                  Email {checkResult.email_sent ? "sent" : "not sent"}
-                </Badge>
-              ) : null}
-            </AlertTitle>
-            <AlertDescription className="space-y-1.5">
-              <p>{checkResult.message}</p>
-              {checkResult.email_error ? (
-                <p>{checkResult.email_error}</p>
-              ) : null}
-            </AlertDescription>
-          </Alert>
-        ) : null}
 
         <Card className="border-border/70 pt-0">
           <CardHeader className="px-4 py-4">

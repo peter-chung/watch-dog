@@ -1,122 +1,29 @@
-"use client";
+import { LoginPageClient } from "@/components/auth/login-page-client";
 
-import Link from "next/link";
-import { startTransition, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { KeyRoundIcon } from "lucide-react";
+type LoginPageProps = {
+  searchParams: Promise<{
+    signup?: string | string[];
+    email?: string | string[];
+  }>;
+};
 
-import { useSupabaseAuth } from "@/components/auth/supabase-auth-provider";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-
-export default function Page() {
-  const router = useRouter();
-  const { isLoading, session, supabase } = useSupabaseAuth();
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (!isLoading && session) {
-      router.replace("/");
-    }
-  }, [isLoading, router, session]);
-
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setIsSubmitting(true);
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      setError(error.message);
-      setIsSubmitting(false);
-      return;
-    }
-
-    startTransition(() => {
-      router.replace("/");
-      router.refresh();
-    });
+function getSingleValue(value: string | string[] | undefined) {
+  if (typeof value === "string") {
+    return value;
   }
 
+  return value?.[0];
+}
+
+export default async function Page({ searchParams }: LoginPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const signupStatus = getSingleValue(resolvedSearchParams.signup);
+  const initialEmail = getSingleValue(resolvedSearchParams.email) ?? "";
+
   return (
-    <section className="mx-auto flex min-h-[calc(100vh-12rem)] w-full max-w-md items-center">
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>
-            Sign in to manage your trackers.
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent className="space-y-6">
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              <KeyRoundIcon className="size-4" />
-              {isSubmitting ? "Signing in..." : "Login"}
-            </Button>
-
-            {error ? (
-              <Alert variant="destructive">
-                <AlertTitle>Login failed</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            ) : null}
-          </form>
-
-          <p className="text-sm text-muted-foreground">
-            Need an account?{" "}
-            <Link
-              href="/signup"
-              className="font-medium text-foreground underline"
-            >
-              Sign up
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
-    </section>
+    <LoginPageClient
+      initialEmail={initialEmail}
+      showSignupSuccess={signupStatus === "success"}
+    />
   );
 }

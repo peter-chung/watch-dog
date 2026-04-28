@@ -11,7 +11,7 @@ export default function Page() {
       <section className="mx-auto flex min-h-[calc(100vh-12rem)] w-full max-w-2xl items-center">
         <div className="w-full space-y-5">
           <Button asChild variant="ghost" size="sm">
-            <Link href="/">
+            <Link href="/dashboard">
               <ArrowLeftIcon className="size-4" />
               Back to Dashboard
             </Link>

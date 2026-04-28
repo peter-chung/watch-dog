@@ -21,11 +21,13 @@ import { Label } from "@/components/ui/label";
 type LoginPageClientProps = {
   initialEmail: string;
   showSignupSuccess: boolean;
+  demoStatus?: string;
 };
 
 export function LoginPageClient({
   initialEmail,
   showSignupSuccess,
+  demoStatus,
 }: LoginPageClientProps) {
   const router = useRouter();
   const { isLoading, session, supabase } = useSupabaseAuth();
@@ -41,7 +43,7 @@ export function LoginPageClient({
 
   useEffect(() => {
     if (!isLoading && session) {
-      router.replace("/");
+      router.replace("/dashboard");
     }
   }, [isLoading, router, session]);
 
@@ -62,7 +64,7 @@ export function LoginPageClient({
     }
 
     startTransition(() => {
-      router.replace("/");
+      router.replace("/dashboard");
       router.refresh();
     });
   }
@@ -88,6 +90,18 @@ export function LoginPageClient({
               ) : (
                 "Account created. Confirm your email, then sign in."
               )}
+            </p>
+          ) : null}
+          {demoStatus === "unavailable" ? (
+            <p className="text-sm leading-6 text-muted-foreground">
+              Demo login is not configured yet. Add DEMO_USER_EMAIL and
+              DEMO_USER_PASSWORD, then try again.
+            </p>
+          ) : null}
+          {demoStatus === "failed" ? (
+            <p className="text-sm leading-6 text-muted-foreground">
+              Demo login failed. Check that the demo user exists and the
+              configured password is current.
             </p>
           ) : null}
         </CardHeader>

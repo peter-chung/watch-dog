@@ -25,7 +25,7 @@ export function NotFoundState({
   badge = "404",
   title,
   description,
-  primaryHref = "/",
+  primaryHref = "/dashboard",
   primaryLabel = "Go to Dashboard",
   secondaryHref = "/trackers/new",
   secondaryLabel = "Create Tracker",

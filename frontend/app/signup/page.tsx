@@ -29,7 +29,7 @@ export default function Page() {
 
   useEffect(() => {
     if (!isLoading && session) {
-      router.replace("/");
+      router.replace("/dashboard");
     }
   }, [isLoading, router, session]);
 
@@ -53,7 +53,7 @@ export default function Page() {
 
     if (data.session) {
       startTransition(() => {
-        router.replace("/");
+        router.replace("/dashboard");
         router.refresh();
       });
       return;

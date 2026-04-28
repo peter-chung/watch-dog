@@ -12,13 +12,29 @@ type RequireAuthProps = {
 
 export function RequireAuth({ children }: RequireAuthProps) {
   const router = useRouter();
-  const { isLoading, session } = useSupabaseAuth();
+  const { isLoading, refreshSession, session } = useSupabaseAuth();
 
   useEffect(() => {
-    if (!isLoading && !session) {
-      router.replace("/login");
+    let isMounted = true;
+
+    async function verifySessionBeforeRedirect() {
+      if (isLoading || session) {
+        return;
+      }
+
+      const currentSession = await refreshSession();
+
+      if (isMounted && !currentSession) {
+        router.replace("/login");
+      }
     }
-  }, [isLoading, router, session]);
+
+    void verifySessionBeforeRedirect();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isLoading, refreshSession, router, session]);
 
   if (isLoading) {
     return (

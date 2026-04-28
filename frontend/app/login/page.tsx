@@ -4,6 +4,7 @@ type LoginPageProps = {
   searchParams: Promise<{
     signup?: string | string[];
     email?: string | string[];
+    demo?: string | string[];
   }>;
 };
 
@@ -19,11 +20,13 @@ export default async function Page({ searchParams }: LoginPageProps) {
   const resolvedSearchParams = await searchParams;
   const signupStatus = getSingleValue(resolvedSearchParams.signup);
   const initialEmail = getSingleValue(resolvedSearchParams.email) ?? "";
+  const demoStatus = getSingleValue(resolvedSearchParams.demo);
 
   return (
     <LoginPageClient
       initialEmail={initialEmail}
       showSignupSuccess={signupStatus === "success"}
+      demoStatus={demoStatus}
     />
   );
 }

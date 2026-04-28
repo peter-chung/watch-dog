@@ -11,10 +11,12 @@ import {
 import { useSupabaseAuth } from "@/components/auth/supabase-auth-provider";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { Button } from "@/components/ui/button";
+import { isDemoUser } from "@/lib/demo";
 
 export function AppHeader() {
   const { isLoading, user } = useSupabaseAuth();
   const userEmail = user?.email ?? null;
+  const isDemoMode = isDemoUser(user);
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-xl">
@@ -22,7 +24,7 @@ export function AppHeader() {
         <div className="flex min-h-16 items-center justify-between gap-3 py-3">
           <div className="flex min-w-0 items-center gap-3">
             <Link
-              href="/"
+              href={userEmail ? "/dashboard" : "/"}
               className="flex min-w-0 items-center gap-2.5 rounded-md transition-opacity hover:opacity-90"
             >
               <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
@@ -38,12 +40,17 @@ export function AppHeader() {
             <div className="h-9 w-32 shrink-0 rounded-md bg-muted/50" />
           ) : userEmail ? (
             <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-              <Button asChild size="sm">
-                <Link href="/trackers/new">
-                  <PlusIcon className="size-4" />
-                  <span className="sm:hidden">New</span>
-                  <span className="hidden sm:inline">New Tracker</span>
-                </Link>
+              {isDemoMode ? null : (
+                <Button asChild size="sm">
+                  <Link href="/trackers/new">
+                    <PlusIcon className="size-4" />
+                    <span className="sm:hidden">New</span>
+                    <span className="hidden sm:inline">New Tracker</span>
+                  </Link>
+                </Button>
+              )}
+              <Button asChild variant="outline" size="sm">
+                <Link href="/dashboard">Dashboard</Link>
               </Button>
               <LogoutButton compactOnMobile />
             </div>

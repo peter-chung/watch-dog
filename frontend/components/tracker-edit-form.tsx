@@ -37,12 +37,14 @@ function normalizeUrl(url: string) {
 
 type TrackerEditFormProps = {
   tracker: Tracker;
+  isReadOnly?: boolean;
   isSaving: boolean;
   onSave: (payload: UpdateTrackerPayload) => Promise<void>;
 };
 
 export function TrackerEditForm({
   tracker,
+  isReadOnly = false,
   isSaving,
   onSave,
 }: TrackerEditFormProps) {
@@ -124,7 +126,9 @@ export function TrackerEditForm({
       <CardHeader className="px-4 py-4">
         <CardTitle className="text-xl">Edit Tracker</CardTitle>
         <CardDescription className="max-w-2xl">
-          Update the page target, selector, or monitoring status.
+          {isReadOnly
+            ? "Demo mode is read-only. Selector testing is still available."
+            : "Update the page target, selector, or monitoring status."}
         </CardDescription>
       </CardHeader>
 
@@ -163,6 +167,7 @@ export function TrackerEditForm({
               id="edit-active"
               checked={isActive}
               onCheckedChange={setIsActive}
+              disabled={isReadOnly}
               aria-label="Toggle tracker active state"
             />
           </div>
@@ -177,7 +182,7 @@ export function TrackerEditForm({
               <SearchCheckIcon className="size-4" />
               {isTesting ? "Testing..." : "Test Selector"}
             </Button>
-            <Button type="submit" disabled={isSaving || isTesting}>
+            <Button type="submit" disabled={isReadOnly || isSaving || isTesting}>
               {isSaving ? "Saving..." : "Save Changes"}
             </Button>
           </div>

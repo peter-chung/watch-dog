@@ -3,7 +3,11 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.dependencies.auth import AuthenticatedUser, get_current_user, get_current_user_id
+from app.dependencies.auth import (
+    AuthenticatedUser,
+    get_current_user_id,
+    get_writable_user,
+)
 from app.schemas.tracker import (
     ChangeLogResponse,
     TrackerCreate,
@@ -35,7 +39,7 @@ def parse_tracker_id_or_404(tracker_id: str) -> str:
 
 @router.post("")
 def create_tracker(
-    tracker: TrackerCreate, user: AuthenticatedUser = Depends(get_current_user)
+    tracker: TrackerCreate, user: AuthenticatedUser = Depends(get_writable_user)
 ):
     payload = {
         "url": str(tracker.url),
@@ -85,8 +89,9 @@ def get_tracker_change_logs(
 def update_tracker(
     tracker_id: str,
     tracker_update: TrackerUpdate,
-    user_id: str = Depends(get_current_user_id),
+    user: AuthenticatedUser = Depends(get_writable_user),
 ):
+    user_id = user["id"]
     tracker_id = parse_tracker_id_or_404(tracker_id)
     update_data = tracker_update.model_dump(exclude_unset=True)
 
@@ -105,7 +110,11 @@ def update_tracker(
 
 
 @router.delete("/{tracker_id}")
-def delete_tracker(tracker_id: str, user_id: str = Depends(get_current_user_id)):
+def delete_tracker(
+    tracker_id: str,
+    user: AuthenticatedUser = Depends(get_writable_user),
+):
+    user_id = user["id"]
     tracker_id = parse_tracker_id_or_404(tracker_id)
     data = delete_tracker_record_for_user(tracker_id, user_id)
 
@@ -132,8 +141,12 @@ def test_tracker(tracker_test: TrackerTestRequest):
 
 
 @router.post("/{tracker_id}/check")
-def run_tracker_check(tracker_id: str, user_id: str = Depends(get_current_user_id)):
+def run_tracker_check(
+    tracker_id: str,
+    user: AuthenticatedUser = Depends(get_writable_user),
+):
     try:
+        user_id = user["id"]
         tracker_id = parse_tracker_id_or_404(tracker_id)
         tracker = get_tracker_by_id_record_for_user(tracker_id, user_id)
 

@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/table";
 
 type TrackerListProps = {
+  isReadOnly?: boolean;
   trackers: Tracker[];
 };
 
@@ -120,7 +121,7 @@ function getDisplayHost(value: string) {
   }
 }
 
-export function TrackerList({ trackers }: TrackerListProps) {
+export function TrackerList({ isReadOnly = false, trackers }: TrackerListProps) {
   const router = useRouter();
 
   function openTracker(trackerId: string) {
@@ -132,11 +133,17 @@ export function TrackerList({ trackers }: TrackerListProps) {
       <EmptyState
         icon={<SearchCheckIcon className="size-5" />}
         title="No trackers yet"
-        description="Create your first tracker to start monitoring a webpage and receive change alerts."
+        description={
+          isReadOnly
+            ? "Demo mode uses seeded tracker data. There are no trackers available for this demo account yet."
+            : "Create your first tracker to start monitoring a webpage and receive change alerts."
+        }
         action={
-          <Button asChild>
-            <Link href="/trackers/new">Create Your First Tracker</Link>
-          </Button>
+          isReadOnly ? null : (
+            <Button asChild>
+              <Link href="/trackers/new">Create Your First Tracker</Link>
+            </Button>
+          )
         }
       />
     );

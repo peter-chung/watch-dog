@@ -6,9 +6,12 @@ def extract_content(html: str, selector: str) -> str:
     element = soup.select_one(selector)
 
     if element is None:
-        raise ValueError("No element found for the provided selector.")
-
-    text = element.get_text(separator=" ", strip=True)
+        if selector.strip().lower() == "body":
+            text = soup.get_text(separator=" ", strip=True)
+        else:
+            raise ValueError("No element found for the provided selector.")
+    else:
+        text = element.get_text(separator=" ", strip=True)
 
     if not text:
         raise ValueError("The selected element contains no text.")

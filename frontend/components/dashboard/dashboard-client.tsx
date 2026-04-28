@@ -10,7 +10,9 @@ import {
 } from "lucide-react";
 
 import { useSupabaseAuth } from "@/components/auth/supabase-auth-provider";
+import { DemoModeBanner } from "@/components/demo-mode-banner";
 import { getTrackers, type Tracker } from "@/lib/api";
+import { isDemoUser } from "@/lib/demo";
 import { TrackerList } from "@/components/tracker-list";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -89,7 +91,8 @@ function MetricCard({
 
 export function DashboardClient() {
   const router = useRouter();
-  const { supabase } = useSupabaseAuth();
+  const { supabase, user } = useSupabaseAuth();
+  const isDemoMode = isDemoUser(user);
   const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -147,6 +150,8 @@ export function DashboardClient() {
 
   return (
     <section className="space-y-6">
+      {isDemoMode ? <DemoModeBanner /> : null}
+
       <Card className="border-border/70 pt-0">
         <CardHeader className="gap-4 pt-6 pb-4">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
@@ -223,7 +228,9 @@ export function DashboardClient() {
         </Alert>
       ) : null}
 
-      {!isLoading && !error ? <TrackerList trackers={trackers} /> : null}
+      {!isLoading && !error ? (
+        <TrackerList isReadOnly={isDemoMode} trackers={trackers} />
+      ) : null}
     </section>
   );
 }

@@ -24,8 +24,10 @@ import {
   type UpdateTrackerPayload,
 } from "@/lib/api";
 import { useSupabaseAuth } from "@/components/auth/supabase-auth-provider";
+import { DemoModeBanner } from "@/components/demo-mode-banner";
 import { NotFoundState } from "@/components/not-found-state";
 import { TrackerEditForm } from "@/components/tracker-edit-form";
+import { isDemoUser } from "@/lib/demo";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -169,7 +171,8 @@ export function TrackerDetailClient({
   trackerId,
 }: TrackerDetailClientProps) {
   const router = useRouter();
-  const { supabase } = useSupabaseAuth();
+  const { supabase, user } = useSupabaseAuth();
+  const isDemoMode = isDemoUser(user);
   const [tracker, setTracker] = useState<Tracker | null>(null);
   const [changeLogs, setChangeLogs] = useState<ChangeLog[]>([]);
   const [checkResult, setCheckResult] = useState<TrackerCheckResult | null>(
@@ -310,7 +313,7 @@ export function TrackerDetailClient({
         description: "The tracker has been removed from your dashboard.",
       });
       setIsDeleteDialogOpen(false);
-      router.push("/");
+      router.push("/dashboard");
       router.refresh();
     } catch (err) {
       const message =
@@ -336,7 +339,7 @@ export function TrackerDetailClient({
     return (
       <section className="space-y-4">
         <Button asChild variant="ghost">
-          <Link href="/">Back to Dashboard</Link>
+          <Link href="/dashboard">Back to Dashboard</Link>
         </Button>
         <Alert variant="destructive">
           <AlertTitle>Failed to load tracker</AlertTitle>
@@ -365,9 +368,11 @@ export function TrackerDetailClient({
   return (
     <>
       <section className="space-y-8">
+        {isDemoMode ? <DemoModeBanner /> : null}
+
         <div className="space-y-4">
           <Button asChild variant="ghost" size="sm">
-            <Link href="/">
+            <Link href="/dashboard">
               <ArrowLeftIcon className="size-4" />
               Back to Dashboard
             </Link>
@@ -403,7 +408,7 @@ export function TrackerDetailClient({
                     type="button"
                     variant="outline"
                     onClick={handleRunCheck}
-                    disabled={isRunningCheck}
+                    disabled={isDemoMode || isRunningCheck}
                   >
                     <PlayIcon className="size-4" />
                     {isRunningCheck ? "Running..." : "Run Check"}
@@ -413,7 +418,7 @@ export function TrackerDetailClient({
                     variant="destructive"
                     className="border border-destructive/40"
                     onClick={() => setIsDeleteDialogOpen(true)}
-                    disabled={isDeleting}
+                    disabled={isDemoMode || isDeleting}
                   >
                     <Trash2Icon className="size-4" />
                     Delete
@@ -472,6 +477,7 @@ export function TrackerDetailClient({
 
         <TrackerEditForm
           tracker={tracker}
+          isReadOnly={isDemoMode}
           isSaving={isSaving}
           onSave={handleSave}
         />

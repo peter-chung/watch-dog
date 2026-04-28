@@ -1,3 +1,4 @@
+import os
 from typing import TypedDict
 
 from fastapi import Depends, HTTPException
@@ -38,3 +39,17 @@ def get_current_user_id(
     user: AuthenticatedUser = Depends(get_current_user),
 ) -> str:
     return user["id"]
+
+
+def get_writable_user(
+    user: AuthenticatedUser = Depends(get_current_user),
+) -> AuthenticatedUser:
+    demo_user_email = os.getenv("DEMO_USER_EMAIL", "").strip().lower()
+
+    if demo_user_email and user["email"].lower() == demo_user_email:
+        raise HTTPException(
+            status_code=403,
+            detail="Demo account is read-only.",
+        )
+
+    return user

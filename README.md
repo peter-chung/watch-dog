@@ -20,6 +20,14 @@ cd frontend
 npm run dev
 ```
 
+Required frontend environment variables:
+
+- `NEXT_PUBLIC_API_URL`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- optional `DEMO_USER_EMAIL` and `DEMO_USER_PASSWORD` for the public Try Demo flow
+- optional `NEXT_PUBLIC_DEMO_USER_EMAIL` so the UI can show read-only demo mode
+
 ## Backend
 
 Run the backend from `backend/`:
@@ -55,6 +63,7 @@ Required Render environment variables:
 - `RESEND_API_KEY`
 - `RESEND_FROM_EMAIL`
 - `CORS_ORIGINS`
+- optional `DEMO_USER_EMAIL` to make the demo account read-only
 - optional `CORS_ORIGIN_REGEX` for preview domains
 
 `CORS_ORIGINS` accepts a comma-separated list of allowed frontend origins. For a Vercel production frontend, set it to your deployed frontend URL.
@@ -75,6 +84,7 @@ Required Vercel environment variables:
 - `RESEND_FROM_EMAIL`
 - `CORS_ORIGINS`
 - `CRON_SECRET`
+- optional `DEMO_USER_EMAIL` to make the demo account read-only
 - optional `CORS_ORIGIN_REGEX`
 
 Vercel's FastAPI deployment expects the app entrypoint at the project root, so this backend uses `index.py` directly and does not need a `vercel.json` file for routing.

@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { PlusIcon, SearchCheckIcon, SparklesIcon } from "lucide-react";
 import { toast } from "sonner";
 
+import { useSupabaseAuth } from "@/components/auth/supabase-auth-provider";
 import { createTracker, testTracker } from "@/lib/api";
+import { isDemoUser } from "@/lib/demo";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -29,8 +31,14 @@ function normalizeUrl(url: string) {
   return trimmed;
 }
 
-export function TrackerForm() {
+type TrackerFormProps = {
+  isReadOnly?: boolean;
+};
+
+export function TrackerForm({ isReadOnly = false }: TrackerFormProps) {
   const router = useRouter();
+  const { user } = useSupabaseAuth();
+  const isFormReadOnly = isReadOnly || isDemoUser(user);
 
   const [url, setUrl] = useState("");
   const [selector, setSelector] = useState("");
@@ -59,7 +67,7 @@ export function TrackerForm() {
         description: "Your tracker has been saved and added to the dashboard.",
       });
 
-      router.push("/");
+      router.push("/dashboard");
       router.refresh();
     } catch (err) {
       const message =
@@ -107,7 +115,9 @@ export function TrackerForm() {
       <CardHeader className="px-4 py-4">
         <CardTitle className="text-2xl">Create a new tracker</CardTitle>
         <CardDescription>
-          Add a webpage URL and CSS selector to monitor for changes.
+          {isFormReadOnly
+            ? "Demo mode is read-only. Selector testing is still available."
+            : "Add a webpage URL and CSS selector to monitor for changes."}
         </CardDescription>
       </CardHeader>
 
@@ -157,7 +167,7 @@ export function TrackerForm() {
             <Button
               type="submit"
               className="w-full sm:w-auto"
-              disabled={isSubmitting || isTesting}
+              disabled={isFormReadOnly || isSubmitting || isTesting}
             >
               <PlusIcon className="size-4" />
               {isSubmitting ? "Creating..." : "Create Tracker"}
